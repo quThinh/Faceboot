@@ -42,7 +42,7 @@ Article.belongsTo(User)
 User.hasMany(Friend,{
     onDelete: 'CASCADE'
 })
-Friend.belongsToMany(User)
+// Friend.belongsToMany(User)
 //1 to 1 relation between user and coordinate
 User.hasOne(MyCoordinate,{
     onDelete: 'CASCADE'
@@ -89,15 +89,15 @@ Comment.belongsTo(Article)
 // Comment.belongsTo(User)
 
 //Many to many relation between User and User
-User.belongsToMany(User,{
-    through:'Followers',
-    as:'followers',
-    timestamps:false,
-})
+// User.belongsToMany(User,{
+//     through:'Followers',
+//     as:'followers',
+//     timestamps:false,
+// })
 
 //favourite Many to many relation between User and article
-User.belongsToMany(Article,{through: 'Favourites',timestamps:false})
-Article.belongsToMany(User,{through: 'Favourites',timestamps:false})
+// User.belongsToMany(Article,{through: 'Favourites',timestamps:false})
+// Article.belongsToMany(User,{through: 'Favourites',timestamps:false})
 
 
 
