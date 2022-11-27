@@ -10,7 +10,7 @@ const User = require('./models/User')
 const Article = require('./models/Article')
 const Tag = require('./models/Tag')
 const Comment = require('./models/Comments')
-const Friend = require('./models/Friend')
+const Relationship = require('./models/Relationship')
 const MyCoordinate = require('./models/MyCoordinates')
 const Reactions = require('./models/Reactions')
 const RecommendFriend = require('./models/RecommendFriend')
@@ -38,11 +38,22 @@ User.hasMany(Article,{
     onDelete: 'CASCADE'
 })
 Article.belongsTo(User)
-//1 to many relation between user and friend
-User.hasMany(Friend,{
-    onDelete: 'CASCADE'
-})
-// Friend.belongsToMany(User)
+//many to many relation between user and user => create table Friend
+
+User.belongsToMany(User, {
+    through: 'Relationship',
+    as: 'user1',
+    foreignKey: 'user1_id',
+    otherKey: 'user2_id'
+  });
+  
+  User.belongsToMany(User, {
+    through: 'Relationship',
+    as: 'user2',
+    foreignKey: 'user2_id',
+    otherKey: 'user1_id'
+  });
+
 //1 to 1 relation between user and coordinate
 User.hasOne(MyCoordinate,{
     onDelete: 'CASCADE'
