@@ -1,17 +1,21 @@
 const {DataTypes} = require('sequelize')
 const sequelize = require('../dbConnection')
 
-const Relationship = sequelize.define('Relationship',{
+const Video = sequelize.define('Video',{
     id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
     },
-    role: {
+    cover_url: {
         type: DataTypes.STRING,
         allowNull: false,
-    }
+    },
+    video_url: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
 })
 
-module.exports = Relationship
+module.exports = Video
 

@@ -1,17 +1,18 @@
-const {DataTypes} = require('sequelize')
+const { DataTypes } = require('sequelize')
 const sequelize = require('../dbConnection')
 
-const Relationship = sequelize.define('Relationship',{
+const WatchThread = sequelize.define('WatchThread', {
     id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
     },
-    role: {
+    name: {
         type: DataTypes.STRING,
         allowNull: false,
     }
 })
 
-module.exports = Relationship
+
+module.exports = WatchThread
 

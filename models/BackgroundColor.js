@@ -1,24 +1,30 @@
+
 const {DataTypes} = require('sequelize')
 const sequelize = require('../dbConnection')
 
-const Article = sequelize.define('Article',{
+const BgColor = sequelize.define('BgColor',{
     id : {
         type: DataTypes.INTEGER,
         allowNull: false ,
         primaryKey: true  
     },
-    create_at: {
-        type: DataTypes.DATE,
+    group: {
+        type: DataTypes.STRING,
+        allowNull: false,
     },
-    content: { 
+    isPureColor: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+    },
+    color: { 
       type: DataTypes.STRING,  
       allowNull: false,
     },
-    permission: { 
-      type: DataTypes.INTEGER,  
+    textColor: { 
+      type: DataTypes.STRING,  
       allowNull: false,
     },
 })
 
-module.exports = Article
+module.exports = BgColor
 

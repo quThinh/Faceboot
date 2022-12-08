@@ -2,7 +2,7 @@ const {DataTypes} = require('sequelize')
 const sequelize = require('../dbConnection')
 
 const RecommendFriend = sequelize.define('RecommendFriend',{
-    Id: {
+    id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
@@ -11,10 +11,10 @@ const RecommendFriend = sequelize.define('RecommendFriend',{
         type: DataTypes.INTEGER,
         allowNull: false,
     },
-    fromUserId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
+    // fromUserId: {
+    //     type: DataTypes.INTEGER,
+    //     allowNull: false,
+    // },
 })
 
 module.exports = RecommendFriend

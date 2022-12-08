@@ -10,13 +10,20 @@ const User = require('./models/User')
 const Article = require('./models/Article')
 const Tag = require('./models/Tag')
 const Comment = require('./models/Comments')
-const Relationship = require('./models/Relationship')
+// const Relationship = require('./models/Relationship')
 const MyCoordinate = require('./models/MyCoordinates')
 const Reactions = require('./models/Reactions')
 const RecommendFriend = require('./models/RecommendFriend')
 const FriendRequest = require('./models/FriendRequest')
 const SearchRecent = require('./models/SearchRecent')
-
+const WatchVideo = require('./models/WatchVideo')
+const Video = require('./models/Video')
+const BackgroundColor = require('./models/BackgroundColor')
+const PhotoInPost = require('./models/PhotoInPost')
+const PostReport = require('./models/PostReport')
+const Chat = require('./models/Chat')
+const Message = require('./models/Message')
+const Notification = require('./models/Notification')
 const userRoute = require('./routes/users')
 const articleRoute = require('./routes/articles')
 const commentRoute = require('./routes/comments')
@@ -38,6 +45,11 @@ User.hasMany(Article,{
     onDelete: 'CASCADE'
 })
 Article.belongsTo(User)
+//1 to many relation between user and notification
+User.hasMany(Notification,{
+    onDelete: 'CASCADE'
+})
+Notification.belongsTo(User)
 //many to many relation between user and user => create table Friend
 
 User.belongsToMany(User, {
@@ -59,18 +71,51 @@ User.hasOne(MyCoordinate,{
     onDelete: 'CASCADE'
 })
 MyCoordinate.belongsTo(User)
+// //1 to many relation between Article and photo
+// User.hasOne(PhotoInPost,{
+//     onDelete: 'CASCADE'
+// })
+// PhotoInPost.belongsTo(User)
 //1 to many relation between User and Comments
 User.hasMany(Comment,{onDelete: 'CASCADE'})
 Comment.belongsTo(User)
-//1 to many relation between User and Recommend Friend
-User.hasMany(RecommendFriend,{onDelete: 'CASCADE'})
-RecommendFriend.belongsTo(User)
-//1 to many relation between User and FriendRequest
-User.hasMany(FriendRequest,{onDelete: 'CASCADE'})
-FriendRequest.belongsTo(User)
+//many to many relationship between user and user => create table friendRecommend
+User.belongsToMany(User, {
+    through: 'FriendRecommend',
+    as: 'recommend_user1',
+    foreignKey: 'user1_id',
+    otherKey: 'user2_id'
+  });
+  
+  User.belongsToMany(User, {
+    through: 'FriendRecommend',
+    as: 'recommend_user2',
+    foreignKey: 'user2_id',
+    otherKey: 'user1_id'
+  });
+
+//many to many relationship between user and user => create table friendRequest
+User.belongsToMany(User, {
+    through: 'FriendRequest',
+    as: 'send_user',
+    foreignKey: 'send_user_id',
+    otherKey: 'receive_user_id'
+  });
+  
+  User.belongsToMany(User, {
+    through: 'FriendRequest',
+    as: 'receive_user',
+    foreignKey: 'receive_user_id',
+    otherKey: 'send_user_id'
+  });
+
 //1 to many relation between User and SearchRecent
 User.hasMany(SearchRecent,{onDelete: 'CASCADE'})
 SearchRecent.belongsTo(User)
+
+//1 to many relation between User and PostReport
+User.hasOne(PostReport,{onDelete: 'CASCADE'})
+PostReport.belongsTo(User)
 
 //RELATIONS POST:
 //1 to 1 relation between Article and Reaction
@@ -78,37 +123,75 @@ Article.hasOne(Reactions,{
     onDelete: 'CASCADE'
 })
 Reactions.belongsTo(Article)
+//1 to 1 relation between Article and PostReport
+Article.hasOne(PostReport,{
+    onDelete: 'CASCADE'
+})
+PostReport.belongsTo(Article)
 //1 to many relation between article and comment
 Article.hasMany(Comment,{
     onDelete: 'CASCADE'
 })
-Comment.belongsTo(Article)
+//1 to many relation between article and noti
+Article.hasMany(Notification,{
+    onDelete: 'CASCADE'
+})
+Notification.belongsTo(Article)
+//1 to many relation between article and photo
+Article.hasMany(PhotoInPost,{
+    onDelete: 'CASCADE'
+})
+PhotoInPost.belongsTo(Article)
+
+//RELATIONS WatchVideo:
+//1 to 1 relation between WatchVideo and Video
+WatchVideo.hasOne(Video,{
+    onDelete: 'CASCADE'
+})
+Video.belongsTo(WatchVideo)
+//1 to 1 relation between WatchVideo and Reaction
+WatchVideo.hasOne(Reactions,{
+    onDelete: 'CASCADE'
+})
+Reactions.belongsTo(WatchVideo)
+//1 to many relation between WatchVideo and comment
+WatchVideo.hasMany(Comment,{
+    onDelete: 'CASCADE'
+})
+Comment.belongsTo(WatchVideo)
 
 
-
-
-//many to many relation between article and taglist
-// Article.belongsToMany(Tag,{through: 'TagList',uniqueKey:false,timestamps:false})
-// Tag.belongsToMany(Article,{through: 'TagList',uniqueKey:false,timestamps:false})
-
-//One to many relation between Article and Comments
-// Article.hasMany(Comment,{onDelete: 'CASCADE'})
-// Comment.belongsTo(Article)
-
-// //One to many relation between User and Comments
-// User.hasMany(Comment,{onDelete: 'CASCADE'})
-// Comment.belongsTo(User)
-
-//Many to many relation between User and User
-// User.belongsToMany(User,{
-//     through:'Followers',
-//     as:'followers',
-//     timestamps:false,
+//many to many relation between Message and User
+User.belongsToMany(User, {
+    through: 'Message',
+    as: 'sender_message_id',
+    foreignKey: 'sender_id',
+    otherKey: 'receiver_id'
+  });
+  
+  User.belongsToMany(User, {
+    through: 'Message',
+    as: 'receiver_message_id',
+    foreignKey: 'receiver_id',
+    otherKey: 'sender_id'
+  });
+//1 to many relation between Chat and Message
+Chat.hasMany(Message,{
+    onDelete: 'CASCADE'
+})
+Message.belongsTo(Chat)
+//1 to many relation between Chat and Member
+Chat.hasMany(User,{
+    onDelete: 'CASCADE'
+})
+User.belongsTo(Chat)
+//1 to many relation between Chat and blocker
+// Chat.hasMany(User,{
+//     onDelete: 'CASCADE'
 // })
+// User.belongsTo(Chat)
 
-//favourite Many to many relation between User and article
-// User.belongsToMany(Article,{through: 'Favourites',timestamps:false})
-// Article.belongsToMany(User,{through: 'Favourites',timestamps:false})
+
 
 
 

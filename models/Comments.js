@@ -11,10 +11,6 @@ const Comment = sequelize.define('Comment',{
       type: DataTypes.INTEGER,  
       allowNull: false,
     },
-    create_at: { 
-      type: DataTypes.INTEGER,  
-      allowNull: false,
-    },
 })
 
 module.exports = Comment
