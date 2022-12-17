@@ -204,7 +204,7 @@ app.use(morgan('tiny'))
 app.get('/',(req,res) => {
     res.json({status:"API is running"});
 })
-app.use('/api',userRoute)
+app.use('/',userRoute)
 app.use('/api/articles',articleRoute)
 app.use('/api/articles',commentRoute)
 app.use('/api/tags',tagRoute)
@@ -212,6 +212,9 @@ app.use('/api/profiles',profileRoute)
 app.use('/api/articles',favouriteRoute)
 app.use(notFound)
 app.use(errorHandler)
+
+//user route
+app.use('/api/articles',favouriteRoute)
 
 const PORT = process.env.PORT || 8080
 

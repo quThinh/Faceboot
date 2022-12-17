@@ -1,17 +1,27 @@
-const { DataTypes } = require('sequelize')
+const { DataTypes, UUIDV4 } = require('sequelize')
 const sequelize = require('../dbConnection')
 
 const User = sequelize.define('User', {
-    id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        primaryKey: true,
-    },
-    name: {
+    // id: {
+    //     type: DataTypes.INTEGER,
+    //     set: UUIDV4.INTEGER,
+    //     allowNull: false,
+    //     primaryKey: true,
+    // },
+    first_name: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    username: {
+    last_name: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    user_name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    email: {
+        primaryKey: true,
         type: DataTypes.STRING,
         allowNull: false,
     },
@@ -23,45 +33,53 @@ const User = sequelize.define('User', {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    subName: {
+    sub_name: {
         type: DataTypes.STRING,
         allowNull: true,
     },
-    introTxt: {
+    intro_txt: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     work_at: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
+    },
+    gender: {
+        type: DataTypes.STRING,
+        allowNull: true,
     },
     live_in: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    country: {
         type: DataTypes.STRING,
         allowNull: false,
     },
     relationship: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     learn_at: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     from: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     follower: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
     },
     cover_url: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     avatar_url: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
 })
 
