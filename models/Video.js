@@ -4,6 +4,7 @@ const sequelize = require('../dbConnection')
 const Video = sequelize.define('Video',{
     id: {
         type: DataTypes.INTEGER,
+        unique: true,  
         allowNull: false,
         primaryKey: true,
     },

@@ -15,6 +15,7 @@ const MyCoordinate = require('./models/MyCoordinates')
 const Reactions = require('./models/Reactions')
 const RecommendFriend = require('./models/RecommendFriend')
 const FriendRequest = require('./models/FriendRequest')
+const Friend = require('./models/Friend')
 const SearchRecent = require('./models/SearchRecent')
 const WatchVideo = require('./models/WatchVideo')
 const Video = require('./models/Video')
@@ -25,6 +26,7 @@ const Chat = require('./models/Chat')
 const Message = require('./models/Message')
 const Notification = require('./models/Notification')
 const userRoute = require('./routes/users')
+const friendRoute = require('./routes/friends')
 const articleRoute = require('./routes/articles')
 const commentRoute = require('./routes/comments')
 const tagRoute = require('./routes/tags')
@@ -98,15 +100,15 @@ User.belongsToMany(User, {
 User.belongsToMany(User, {
     through: 'FriendRequest',
     as: 'send_user',
-    foreignKey: 'send_user_id',
-    otherKey: 'receive_user_id'
+    foreignKey: 'send_user_email',
+    otherKey: 'receive_user_email'
   });
   
   User.belongsToMany(User, {
     through: 'FriendRequest',
     as: 'receive_user',
-    foreignKey: 'receive_user_id',
-    otherKey: 'send_user_id'
+    foreignKey: 'receive_user_email',
+    otherKey: 'send_user_email'
   });
 
 //1 to many relation between User and SearchRecent
@@ -173,7 +175,21 @@ User.belongsToMany(User, {
     through: 'Message',
     as: 'receiver_message_id',
     foreignKey: 'receiver_id',
-    otherKey: 'sender_id'
+  otherKey: 'sender_id'
+  });
+//many to many Friend relation between user and User
+User.belongsToMany(User, {
+    through: 'Friend',
+    as: 'emailFriend1',
+    foreignKey: 'user1_email',
+    otherKey: 'user2_email'
+  });
+  
+  User.belongsToMany(User, {
+    through: 'Friend',
+    as: 'emailFriend2',
+    foreignKey: 'user2_email',
+    otherKey: 'user1_email'
   });
 //1 to many relation between Chat and Message
 Chat.hasMany(Message,{
@@ -181,10 +197,23 @@ Chat.hasMany(Message,{
 })
 Message.belongsTo(Chat)
 //1 to many relation between Chat and Member
-Chat.hasMany(User,{
-    onDelete: 'CASCADE'
-})
-User.belongsTo(Chat)
+// User.belongsToMany(User, {
+//     through: 'Chat',
+//     as: 'sender_message_id',
+//     foreignKey: 'sender_id',
+//     otherKey: 'receiver_id'
+//   });
+  
+//   User.belongsToMany(User, {
+//     through: 'Chat',
+//     as: 'receiver_message_id',
+//     foreignKey: 'receiver_id',
+//     otherKey: 'sender_id'
+//   });
+// Chat.hasMany(User,{
+//     onDelete: 'CASCADE'
+// })
+// User.belongsTo(Chat)
 //1 to many relation between Chat and blocker
 // Chat.hasMany(User,{
 //     onDelete: 'CASCADE'
@@ -205,6 +234,7 @@ app.get('/',(req,res) => {
     res.json({status:"API is running"});
 })
 app.use('/',userRoute)
+app.use('/',friendRoute)
 app.use('/api/articles',articleRoute)
 app.use('/api/articles',commentRoute)
 app.use('/api/tags',tagRoute)

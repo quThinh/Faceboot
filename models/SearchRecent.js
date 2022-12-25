@@ -2,9 +2,10 @@ const {DataTypes} = require('sequelize')
 const sequelize = require('../dbConnection')
 
 const SearchRecent = sequelize.define('SearchRecent',{
-    Id: {
+    id: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        unique: true,  
         primaryKey: true,
     },
     type: {

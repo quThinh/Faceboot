@@ -5,7 +5,11 @@ const {authByToken} = require('../middleware/auth')
 
 router.post('/users/register',UserController.createUser)                     //Register a new user
 router.post('/users/login',UserController.loginUser)                //Login for existing user
-router.get('/user',authByToken,UserController.getUserByEmail)       //Gets the currently logged-in user
-router.patch('/user',authByToken,UserController.updateUserDetails)  //Updated user information for current user
-
+router.patch('/users/edit',authByToken,UserController.editUser)                //Edit user information
+router.patch('/user/change-password',authByToken,UserController.changePassword)       //Changes password
+router.get('/users',authByToken,UserController.getSpecificUser)       //get specific user from client
+router.patch('/users/set-block',authByToken,UserController.setBlock)       //set type block for client
+router.get('/users/search/:name',authByToken,UserController.search)       //search when loggined
+// router.get('/search',UserController.search)       //search when loggined
+// router.get('/test', UserController.test)
 module.exports = router

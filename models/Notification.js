@@ -5,6 +5,7 @@ const Notification = sequelize.define('Notification', {
     id: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        unique: true,  
         primaryKey: true,
     },
     isSeen: {

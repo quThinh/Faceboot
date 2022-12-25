@@ -6,6 +6,7 @@ const BgColor = sequelize.define('BgColor',{
     id : {
         type: DataTypes.INTEGER,
         allowNull: false ,
+        unique: true,  
         primaryKey: true  
     },
     group: {

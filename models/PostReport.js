@@ -4,6 +4,7 @@ const sequelize = require('../dbConnection')
 const PostReport = sequelize.define('PostReport', {
     id: {
         type: DataTypes.INTEGER,
+        unique: true,  
         allowNull: false,
         primaryKey: true,
     },

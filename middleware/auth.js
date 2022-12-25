@@ -4,7 +4,6 @@ module.exports.authByToken = async (req,res,next) => {
     
     //Check for Authorization header
     const authHeader = req.header('Authorization') ? req.header('Authorization').split(' ') : null
-    
     if(!authHeader){
         return res.status(422).json({
             errors: { body: [ 'Authorization failed', 'No Authorization header' ] }
@@ -12,7 +11,7 @@ module.exports.authByToken = async (req,res,next) => {
     }
 
     //Check if authorization type is token
-    if(authHeader[0] !== 'Token')
+    if(authHeader[0] !== 'Bearer')
         return res.status(401).json({
             errors: { body: [ 'Authorization failed', 'Token missing' ] }
         })

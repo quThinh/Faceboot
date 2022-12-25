@@ -5,6 +5,7 @@ const Message = sequelize.define('Message', {
     id: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        unique: true,  
         primaryKey: true,
     },
     time: {

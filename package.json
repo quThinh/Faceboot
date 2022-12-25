@@ -30,7 +30,8 @@
     "mysql2": "^2.2.5",
     "pg": "^8.5.1",
     "pg-hstore": "^2.3.3",
-    "sequelize": "^6.25.8"
+    "sequelize": "^6.25.8",
+    "uuidv4": "^6.2.13"
   },
   "engines": {
     "node": "12.19.0"

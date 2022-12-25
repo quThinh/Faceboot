@@ -5,6 +5,7 @@ const RecommendFriend = sequelize.define('RecommendFriend',{
     id: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        unique: true,  
         primaryKey: true,
     },
     mutualCount: {

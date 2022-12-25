@@ -3,13 +3,14 @@ const sequelize = require('../dbConnection')
 
 const FriendRequest = sequelize.define('FriendRequest',{
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
+        unique: true,  
         primaryKey: true,
     },
     mutualCount: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
     },
     // fromUserId: {
     //     type: DataTypes.INTEGER,

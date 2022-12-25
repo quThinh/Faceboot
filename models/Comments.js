@@ -5,6 +5,7 @@ const Comment = sequelize.define('Comment',{
     id: {
         primaryKey: true,
         type: DataTypes.INTEGER,
+        unique: true,  
         allowNull: false,
     },
     content: { 

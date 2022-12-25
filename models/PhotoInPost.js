@@ -5,6 +5,7 @@ const PhotoInPost = sequelize.define('PhotoInPost',{
     id: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        unique: true,  
         primaryKey:true,
     },
     isHighLight: {

@@ -1,28 +1,24 @@
-const { DataTypes, UUIDV4 } = require('sequelize')
+const { DataTypes } = require('sequelize')
 const sequelize = require('../dbConnection')
 
 const User = sequelize.define('User', {
-    // id: {
-    //     type: DataTypes.INTEGER,
-    //     set: UUIDV4.INTEGER,
-    //     allowNull: false,
-    //     primaryKey: true,
-    // },
+    id: {
+        type: DataTypes.STRING(100),
+        unique: true,  
+        allowNull: false,
+        // primaryKey: true,
+    },
     first_name: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(100),
         allowNull: false,
     },
     last_name: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(100),
         allowNull: true,
-    },
-    user_name: {
-        type: DataTypes.STRING,
-        allowNull: false,
     },
     email: {
         primaryKey: true,
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(50),
         allowNull: false,
     },
     birth_day:{
@@ -30,64 +26,60 @@ const User = sequelize.define('User', {
         allowNull: true,
     },
     hash_password: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(100),
         allowNull: false,
     },
     sub_name: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(100),
         allowNull: true,
     },
     intro_txt: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT('long'),
         allowNull: true,
     },
     work_at: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(100),
         allowNull: true,
     },
     gender: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(10),
         allowNull: true,
     },
     live_in: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(50),
         allowNull: true,
     },
     country: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(50),
         allowNull: false,
     },
     relationship: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(50),
         allowNull: true,
     },
     learn_at: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(50),
         allowNull: true,
     },
     from: {
-        type: DataTypes.STRING,
-        allowNull: true,
-    },
-    follower: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING(50),
         allowNull: true,
     },
     cover_url: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(50),
         allowNull: true,
     },
     avatar_url: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(50),
         allowNull: true,
+    },
+    //0 is unblock, 1 is block
+    type: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        allowNull: false,
     },
 })
 
 
 module.exports = User
-
-/* {
-  "user": {
-    "token": "jwt.token.here",
-  }
-} */

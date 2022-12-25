@@ -5,6 +5,7 @@ const WatchThread = sequelize.define('WatchThread', {
     id: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        unique: true,  
         primaryKey: true,
     },
     name: {
