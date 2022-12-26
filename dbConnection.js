@@ -29,7 +29,7 @@ const { Sequelize } = require('sequelize')
 //     }
 // });
 
-const sequelize = new Sequelize('faceboot', process.env.DB_USER_NAME, process.env.DB_PASSWORD, {
+const sequelize = new Sequelize('llfi38gpqqk8lyr4', process.env.DB_USER_NAME, process.env.DB_PASSWORD, {
     host: process.env.DB_HOST,
     logging: false,
     dialect: 'mysql',/* one of 'mysql' | 'postgres' | 'sqlite' | 'mariadb' | 'mssql' | 'db2' | 'snowflake' | 'oracle' */
