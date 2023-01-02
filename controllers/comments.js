@@ -59,34 +59,34 @@ module.exports.postNewComment = async (req,res) => {
 
 module.exports.getAllComments = async (req,res) => {
     try{
-        const slugInfo = req.params.slug
+        // const slugInfo = req.params.slug
 
-        //Find for article
-        const article = await Article.findByPk(slugInfo)
-        if(!article){
-            res.status(404)
-            throw new Error('Article Slug not valid')
-        }
+        // //Find for article
+        // const article = await Article.findByPk(slugInfo)
+        // if(!article){
+        //     res.status(404)
+        //     throw new Error('Article Slug not valid')
+        // }
         
-        const comments = await Comment.findAll({
-            where:{
-                ArticleSlug: slugInfo
-            },
-            include:[
-                {
-                    model: User,
-                    attributes: ['username','bio','image']
-                }
-            ]
-        })
+        // const comments = await Comment.findAll({
+        //     where:{
+        //         ArticleSlug: slugInfo
+        //     },
+        //     include:[
+        //         {
+        //             model: User,
+        //             attributes: ['username','bio','image']
+        //         }
+        //     ]
+        // })
 
-        res.status(201).json({comments})
+        // res.status(201).json({comments})
 
     }catch(e) {
-        const code = res.statusCode ? res.statusCode : 422
-        return res.status(code).json({
-            errors: { body: [ 'Could not create article', e.message ] }
-        })
+        // const code = res.statusCode ? res.statusCode : 422
+        // return res.status(code).json({
+        //     errors: { body: [ 'Could not create article', e.message ] }
+        // })
     }
 }
 

@@ -3,6 +3,7 @@ const User = require('../models/User');
 const Tag = require('../models/Tag');
 const { slugify } = require('../utils/stringUtil');
 const sequelize = require('../dbConnection');
+const { uuid } = require('uuidv4');
 
 function sanitizeOutput(article, user) {
 	const newTagList = [];
@@ -22,18 +23,16 @@ function sanitizeOutput(article, user) {
 }
 
 function sanitizeOutputMultiple(article) {
-	const newTagList = [];
-	for (let t of article.dataValues.Tags) {
+	const newTagList = []; for (let t of article.dataValues.Tags) {
 		newTagList.push(t.name);
 	}
 	delete article.dataValues.Tags;
 	article.dataValues.tagList = newTagList;
 
 	let user = {
-		username: article.dataValues.User.username,
 		email: article.dataValues.User.email,
-		bio: article.dataValues.User.bio,
-		image: article.dataValues.User.image,
+		intro_txt: article.dataValues.User.intro_txt,
+		avatar_url: article.dataValues.User.avatar_url,
 	};
 
 	delete article.dataValues.User;
@@ -48,20 +47,21 @@ module.exports.createArticle = async (req, res) => {
 		const data = req.body.article;
 		if (!data.title) throw new Error('Article title is required');
 		if (!data.body) throw new Error('Article body is required');
-		if (!data.description) throw new Error('Article description is required');
 
 		//Find out author object
 		const user = await User.findByPk(req.user.email);
 		if (!user) throw new Error('User does not exist');
-		const slug = slugify(data.title);
+		const slug = uuid();
+
 		let article = await Article.create({
-			slug: slug,
+			id: slug,
+			create_at: Date.now(),
 			title: data.title,
-			description: data.description,
-			body: data.body,
+			content: data.body,
+			permission: user.id,
+			update_at: Date.now(),
 			UserEmail: user.email,
 		});
-
 		if (data.tagList) {
 			for (let t of data.tagList) {
 				let tagExists = await Tag.findByPk(t);
@@ -73,10 +73,11 @@ module.exports.createArticle = async (req, res) => {
 					article.addTag(tagExists);
 				}
 			}
-		}
+		} // @todo Set tag for article
+
 
 		article = await Article.findByPk(slug, { include: Tag });
-		article = sanitizeOutput(article, user);
+		article = sanitizeOutput(article, user);  // @todo Set tag for article
 		res.status(201).json({ article });
 	} catch (e) {
 		return res.status(422).json({
@@ -85,14 +86,14 @@ module.exports.createArticle = async (req, res) => {
 	}
 };
 
-module.exports.getSingleArticleBySlug = async (req, res) => {
+module.exports.getDetailArticleById = async (req, res) => {
 	try {
-		const { slug } = req.params;
-		let article = await Article.findByPk(slug, { include: Tag });
+		const { id } = req.params;
+		let article = await Article.findByPk(id, { include: Tag });
 
 		const user = await article.getUser();
 
-		article = sanitizeOutput(article, user);
+		article = sanitizeOutput(article, user); // @todo Set tag for article
 
 		res.status(200).json({ article });
 	} catch (e) {
@@ -106,14 +107,13 @@ module.exports.updateArticle = async (req, res) => {
 	try {
 		if (!req.body.article) throw new Error('No articles data');
 		const data = req.body.article;
-		const slugInfo = req.params.slug;
-		let article = await Article.findByPk(slugInfo, { include: Tag });
+		const id = req.params.id;
+		let article = await Article.findByPk(id, { include: Tag });
 
 		if (!article) {
 			res.status(404);
 			throw new Error('Article not found');
 		}
-
 		const user = await User.findByPk(req.user.email);
 
 		if (user.email != article.UserEmail) {
@@ -122,11 +122,9 @@ module.exports.updateArticle = async (req, res) => {
 		}
 
 		const title = data.title ? data.title : article.title;
-		const description = data.description ? data.description : article.description;
-		const body = data.body ? data.body : article.body;
-		const slug = data.title ? slugify(title) : slugInfo;
+		const content = data.content ? data.content : article.content;
 
-		const updatedArticle = await article.update({ slug, title, description, body });
+		const updatedArticle = await article.update({ id, title, content });
 
 		article = sanitizeOutput(updatedArticle, user);
 		res.status(200).json({ article });
@@ -168,7 +166,6 @@ module.exports.deleteArticle = async (req, res) => {
 module.exports.getAllArticles = async (req, res) => {
 	try {
 		//Get all articles:
-
 		const { tag, author, limit = 20, offset = 0 } = req.query;
 		let article;
 		if (!author && tag) {
@@ -181,7 +178,7 @@ module.exports.getAllArticles = async (req, res) => {
 					},
 					{
 						model: User,
-						attributes: ['email', 'username', 'bio', 'image'],
+						attributes: ['email', 'intro_txt', 'avatar_url'],
 					},
 				],
 				limit: parseInt(limit),
@@ -195,9 +192,7 @@ module.exports.getAllArticles = async (req, res) => {
 						attributes: ['name'],
 					},
 					{
-						model: User,
-						attributes: ['email', 'username', 'bio', 'image'],
-						where: { username: author },
+						model: User, attributes: ['email', 'intro_txt', 'avatar_url'], where: { id: author },
 					},
 				],
 				limit: parseInt(limit),
@@ -213,7 +208,7 @@ module.exports.getAllArticles = async (req, res) => {
 					},
 					{
 						model: User,
-						attributes: ['email', 'username', 'bio', 'image'],
+						attributes: ['email', 'intro_txt', 'avatar_url'],
 						where: { username: author },
 					},
 				],
@@ -229,13 +224,14 @@ module.exports.getAllArticles = async (req, res) => {
 					},
 					{
 						model: User,
-						attributes: ['email', 'username', 'bio', 'image'],
+						attributes: ['email', 'intro_txt', 'avatar_url'],
 					},
 				],
 				limit: parseInt(limit),
 				offset: parseInt(offset),
 			});
 		}
+		console.log(article)
 		let articles = [];
 		for (let t of article) {
 			let addArt = sanitizeOutputMultiple(t);
@@ -248,8 +244,9 @@ module.exports.getAllArticles = async (req, res) => {
 		return res.status(code).json({
 			errors: { body: ['Could not create article', e.message] },
 		});
-	}
-};
+
+	};
+}
 
 module.exports.getFeed = async (req, res) => {
 	try {
