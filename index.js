@@ -134,6 +134,7 @@ PostReport.belongsTo(Article)
 Article.hasMany(Comment,{
     onDelete: 'CASCADE'
 })
+Comment.belongsTo(Article)
 //1 to many relation between article and noti
 Article.hasMany(Notification,{
     onDelete: 'CASCADE'
@@ -241,7 +242,7 @@ app.get('/',(req,res) => {
 app.use('/',userRoute)
 app.use('/',friendRoute)
 app.use('/',articleRoute)
-app.use('/api/articles',commentRoute)
+app.use('/articles',commentRoute)
 app.use('/api/tags',tagRoute)
 app.use('/api/profiles',profileRoute)
 app.use('/api/articles',favouriteRoute)

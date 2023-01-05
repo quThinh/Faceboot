@@ -1,37 +1,39 @@
 const Article = require('../models/Article')
 const User = require('../models/User')
 const Comment = require('../models/Comments')
+const { uuid } = require('uuidv4')
 
-module.exports.postNewComment = async (req,res) => {
-    try{
-        const slugInfo = req.params.slug
+module.exports.postNewComment = async (req, res) => {
+    try {
+        const article_id = req.params.article_id
         const data = req.body.comment
         //Throw error if no data
-        if(!data){
+        if (!data) {
             res.status(422)
             throw new Error('Comment is required')
         }
-        
-        if(!data.body){
+
+        if (!data.body) {
             res.status(422)
             throw new Error('Comment body is required')
         }
 
         //Find for article
-        const article = await Article.findByPk(slugInfo)
-        if(!article){
+        const article = await Article.findByPk(article_id)
+        if (!article) {
             res.status(404)
             throw new Error('Article not found')
         }
-        
+
         //Checking whthter this user has aldready posted a comment
-        const existingComment = await Comment.findAll({where:{UserEmail: req.user.email}})
-        if(existingComment.length > 0){
+        const existingComment = await Comment.findAll({ where: { UserEmail: req.user.email } })
+        if (existingComment.length > 0) {
             throw new Error('You aldready added a review')
         }
 
         //Create new Comment
-        const newComment = await Comment.create({body:data.body})
+        const newUUID = uuid()
+        const newComment = await Comment.create({ id: newUUID, content: data.body })
 
         //Find user
         const user = await User.findByPk(req.user.email)
@@ -42,86 +44,134 @@ module.exports.postNewComment = async (req,res) => {
 
         //Send output
         newComment.dataValues.author = {
-            username: user.dataValues.username,
-            bio: user.dataValues.bio,
-            image: user.dataValues.image,
+            email: user.dataValues.email,
+            intro_txt: user.dataValues.intro_txt,
+            avatar_url: user.dataValues.avatar_url,
         }
 
-        res.status(201).json({newComment})
+        res.status(201).json({ newComment })
 
-    }catch(e) {
+    } catch (e) {
         const code = res.statusCode ? res.statusCode : 422
         return res.status(code).json({
-            errors: { body: [ 'Could not create article', e.message ] }
+            errors: { body: ['Could not post comment', e.message] }
         })
     }
 }
 
-module.exports.getAllComments = async (req,res) => {
-    try{
-        // const slugInfo = req.params.slug
+module.exports.getAllCommentsOfArticle = async (req, res) => {
+    try {
+        const article_id = req.params.article_id
 
-        // //Find for article
-        // const article = await Article.findByPk(slugInfo)
-        // if(!article){
-        //     res.status(404)
-        //     throw new Error('Article Slug not valid')
-        // }
-        
-        // const comments = await Comment.findAll({
-        //     where:{
-        //         ArticleSlug: slugInfo
-        //     },
-        //     include:[
-        //         {
-        //             model: User,
-        //             attributes: ['username','bio','image']
-        //         }
-        //     ]
-        // })
+        //Find for article
+        const article = await Article.findByPk(article_id)
+        if (!article) {
+            res.status(404)
+            throw new Error('Article Id not valid')
+        }
 
-        // res.status(201).json({comments})
+        const comments = await Comment.findAll({
+            where: {
+                ArticleId: article_id
+            },
+            include: [
+                {
+                    model: User,
+                    attributes: ['email', 'intro_txt', 'avatar_url']
+                }
+            ]
+        })
 
-    }catch(e) {
-        // const code = res.statusCode ? res.statusCode : 422
-        // return res.status(code).json({
-        //     errors: { body: [ 'Could not create article', e.message ] }
-        // })
+        res.status(201).json({ comments })
+
+    } catch (e) {
+        const code = res.statusCode ? res.statusCode : 422
+        return res.status(code).json({
+            errors: { body: ['Could not get all comment of article', e.message] }
+        })
     }
 }
 
-module.exports.deleteComment = async (req,res) => {
-    try{
-        const slugInfo = req.params.slug
+module.exports.deleteComment = async (req, res) => {
+    try {
+        const article_id = req.params.article_id
         const idInfo = req.params.id
         //Find for article
-        const article = await Article.findByPk(slugInfo)
-        if(!article){
+        const article = await Article.findByPk(article_id)
+        if (!article) {
             res.status(404)
             throw new Error('Article not found')
         }
-        
+
         //Find for comment
         const comment = await Comment.findByPk(idInfo)
-        if(!comment){
+        if (!comment) {
             res.status(404)
             throw new Error('Comment not found')
         }
 
         //Check whether logged in user is the author of that comment
-        if(req.user.email != comment.UserEmail){
+        if (req.user.email != comment.UserEmail && req.user.email != article.UserEmail) {
             res.status(403)
             throw new Error("You must be the author to modify this comment")
         }
 
         //Delete comment
-        await Comment.destroy({where:{id:idInfo}})
-        res.status(200).json({"message":"Comment deleted successfully"})
+        await Comment.destroy({ where: { id: idInfo } })
+        res.status(200).json({ "message": "Comment deleted successfully" })
 
-    }catch(e) {
+    } catch (e) {
         const code = res.statusCode ? res.statusCode : 422
         return res.status(code).json({
-            errors: { body: [ 'Could not create article', e.message ] }
+            errors: { body: ['Could not delete comment', e.message] }
+        })
+    }
+}
+
+module.exports.updateComment = async (req, res) => {
+    try {
+        const article_id = req.params.article_id;
+        const idInfo = req.params.id
+
+        // update data
+        var data = req.body.comment;
+        var content = data.content;
+
+        // Find article
+        const article = await Article.findByPk(article_id)
+        if (!article) {
+            res.status(404)
+            throw new Error("Article not found")
+        }
+
+        //Find for comment
+        const comment = await Comment.findByPk(idInfo)
+        if (!comment) {
+            res.status(404);
+            throw new Error("Comment not found");
+        }
+
+        // Check authentication
+        if (!req.user.email) {
+            res.status(401);
+            throw new Error("Authentication")
+        }
+        if (req.user.email != comment.UserEmail) {
+            res.status(403);
+            throw new Error("Authorization")
+        }
+        // Check article have this comment
+
+        if (comment.ArticleId != Article.id) {
+            res.status(404);
+            throw new Error("Not found comment")
+        }
+        await comment.update({ idInfo, content })
+        res.status(200).json({ comment })
+    } catch (err) {
+        const code = res.statusCode ? res.statusCode : 422
+        return res.status(code).json({
+            errors: { body: ['Could not update comment', err.message] }
         })
     }
 }

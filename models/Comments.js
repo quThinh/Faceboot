@@ -4,12 +4,12 @@ const sequelize = require('../dbConnection')
 const Comment = sequelize.define('Comment',{
     id: {
         primaryKey: true,
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         unique: true,  
         allowNull: false,
     },
     content: { 
-      type: DataTypes.INTEGER,  
+      type: DataTypes.STRING,  
       allowNull: false,
     },
 })
