@@ -89,10 +89,22 @@ module.exports.createArticle = async (req, res) => {
 module.exports.getDetailArticleById = async (req, res) => {
 	try {
 		const { id } = req.params;
-		let article = await Article.findByPk(id, { include: Tag });
-
-		const user = await article.getUser();
-
+		let article = await Article.findByPk(id, {
+			include: [
+				{
+					model: Tag,
+					attributes: ['name'],
+				},
+				{
+					model: User,
+					attributes: ['email', 'intro_txt', 'avatar_url'],
+				},
+			]
+		});
+		if (!article) {
+			throw new Error("Article not found");
+		}
+		var user = await User.findByPk(article.UserEmail)
 		article = sanitizeOutput(article, user); // @todo Set tag for article
 
 		res.status(200).json({ article });
