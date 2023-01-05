@@ -196,6 +196,11 @@ Chat.hasMany(Message,{
     onDelete: 'CASCADE'
 })
 Message.belongsTo(Chat)
+Article.hasMany(Tag)
+Tag.belongsTo(Article, {
+  as: 'article_id',
+  foreignKey: 'id',
+})
 //1 to many relation between Chat and Member
 // User.belongsToMany(User, {
 //     through: 'Chat',
@@ -235,7 +240,7 @@ app.get('/',(req,res) => {
 })
 app.use('/',userRoute)
 app.use('/',friendRoute)
-app.use('/api/articles',articleRoute)
+app.use('/',articleRoute)
 app.use('/api/articles',commentRoute)
 app.use('/api/tags',tagRoute)
 app.use('/api/profiles',profileRoute)
