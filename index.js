@@ -32,6 +32,7 @@ const commentRoute = require('./routes/comments')
 const tagRoute = require('./routes/tags')
 const profileRoute = require('./routes/profile')
 const favouriteRoute = require('./routes/favourites')
+const reactionRoute = require('./routes/reaction')
 const { post } = require('./routes/users')
 
 const app = express()
@@ -202,6 +203,9 @@ Tag.belongsTo(Article, {
   as: 'article_id',
   foreignKey: 'id',
 })
+
+User.hasMany(Reactions)
+Reactions.belongsTo(User)
 //1 to many relation between Chat and Member
 // User.belongsToMany(User, {
 //     through: 'Chat',
