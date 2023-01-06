@@ -2,19 +2,14 @@ const {DataTypes} = require('sequelize')
 const sequelize = require('../dbConnection')
 
 const Reactions = sequelize.define('Reactions',{
-    love: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
+    id: {
+        type: DataTypes.UUID,
+        primaryKey: true
     },
-    like: {
+    react: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-    },
-    haha: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
-    
+        defaultValue: 0
+    }
 })
 
 module.exports = Reactions
