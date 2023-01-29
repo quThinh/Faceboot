@@ -32,6 +32,7 @@ const commentRoute = require('./routes/comments')
 const tagRoute = require('./routes/tags')
 const profileRoute = require('./routes/profile')
 const favouriteRoute = require('./routes/favourites')
+const utils = require('./routes/utils')
 const reactionRoute = require('./routes/reaction')
 const { post } = require('./routes/users')
 
@@ -234,8 +235,9 @@ Reactions.belongsTo(User)
 
 
 
-const sync = async () => await sequelize.sync({alter:true})
-sync()
+const sync = async () => await sequelize.sync({});
+sync();
+
 
 app.use(express.json())
 app.use(morgan('tiny'))
@@ -245,6 +247,7 @@ app.get('/',(req,res) => {
 })
 app.use('/',userRoute)
 app.use('/',friendRoute)
+app.use('/',utils)
 app.use('/',articleRoute)
 app.use('/articles',commentRoute)
 app.use('/api/tags',tagRoute)

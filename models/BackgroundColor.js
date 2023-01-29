@@ -19,7 +19,11 @@ const BgColor = sequelize.define('BgColor',{
     },
     color: { 
       type: DataTypes.STRING,  
-      allowNull: false,
+      allowNull: true,
+    },
+    bgImage_url: { 
+      type: DataTypes.STRING,  
+      allowNull: true,
     },
     textColor: { 
       type: DataTypes.STRING,  
