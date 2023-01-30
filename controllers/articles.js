@@ -180,14 +180,15 @@ module.exports.getAllArticles = async (req, res) => {
 		//Get all articles:
 		const { tag, author, limit = 20, offset = 0 } = req.query;
 		let article;
+		console.log(author, tag)
 		if (!author && tag) {
 			article = await Article.findAll({
 				include: [
-					{
-						model: Tag,
-						attributes: ['name'],
-						where: { name: tag },
-					},
+					// {
+					// 	model: Tag,
+					// 	attributes: ['name'],
+					// 	where: { name: tag },
+					// },
 					{
 						model: User,
 						attributes: ['email', 'intro_txt', 'avatar_url'],
@@ -199,29 +200,30 @@ module.exports.getAllArticles = async (req, res) => {
 		} else if (author && !tag) {
 			article = await Article.findAll({
 				include: [
+					// {
+					// 	model: Tag,
+					// 	attributes: ['name'],
+					// },
 					{
-						model: Tag,
-						attributes: ['name'],
-					},
-					{
-						model: User, attributes: ['email', 'intro_txt', 'avatar_url'], where: { id: author },
+						model: User, attributes: ['email', 'intro_txt', 'avatar_url'], where: { email: author },
 					},
 				],
 				limit: parseInt(limit),
 				offset: parseInt(offset),
 			});
+			console.log(article)
 		} else if (author && tag) {
 			article = await Article.findAll({
 				include: [
-					{
-						model: Tag,
-						attributes: ['name'],
-						where: { name: tag },
-					},
+					// {
+					// 	model: Tag,
+					// 	attributes: ['name'],
+					// 	where: { name: tag },
+					// },
 					{
 						model: User,
 						attributes: ['email', 'intro_txt', 'avatar_url'],
-						where: { username: author },
+						where: { email: author },
 					},
 				],
 				limit: parseInt(limit),
@@ -230,10 +232,10 @@ module.exports.getAllArticles = async (req, res) => {
 		} else {
 			article = await Article.findAll({
 				include: [
-					{
-						model: Tag,
-						attributes: ['name'],
-					},
+					// {
+					// 	model: Tag,
+					// 	attributes: ['name'],
+					// },
 					{
 						model: User,
 						attributes: ['email', 'intro_txt', 'avatar_url'],
@@ -243,18 +245,17 @@ module.exports.getAllArticles = async (req, res) => {
 				offset: parseInt(offset),
 			});
 		}
-		console.log(article)
-		let articles = [];
-		for (let t of article) {
-			let addArt = sanitizeOutputMultiple(t);
-			articles.push(addArt);
-		}
-
-		res.json({ articles });
+		// let articles = [];
+		// for (let t of article) {
+		// let addArt = sanitizeOutputMultiple(t);
+		// 	articles.push(addArt);
+		// }
+		article.map((e) => e.dataValues)
+		res.json({ article });
 	} catch (e) {
 		const code = res.statusCode ? res.statusCode : 422;
 		return res.status(code).json({
-			errors: { body: ['Could not create article', e.message] },
+			errors: { body: ['Could not get article', e.message] },
 		});
 
 	};
