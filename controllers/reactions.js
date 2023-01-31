@@ -13,7 +13,7 @@ module.exports.postReaction = async (req, res) => {
             res.status(401);
             throw new Error("Authentication")
         }
-
+        console.log(data)
         if (!data) {
             res.status(422)
             throw new Error("No data")
