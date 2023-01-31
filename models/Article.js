@@ -21,6 +21,10 @@ const Article = sequelize.define('Article',{
       type: DataTypes.STRING,  
       allowNull: false,
     },
+    image: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     permission: { 
       type: DataTypes.STRING,  
       allowNull: false,
