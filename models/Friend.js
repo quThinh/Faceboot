@@ -1,18 +1,14 @@
 const {DataTypes} = require('sequelize')
 const sequelize = require('../dbConnection')
-
+const { uuid } = require('uuidv4')
 const Friend = sequelize.define('Friend',{
     id: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,  
         primaryKey: true,
-        defaultValue: "2131",
+        defaultValue: uuid(),
     },
-    // fromUserId: {
-    //     type: DataTypes.INTEGER,
-    //     allowNull: false,
-    // },
 })
 
 module.exports = Friend

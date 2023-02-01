@@ -3,7 +3,7 @@ const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 
-const {notFound,errorHandler} = require('./middleware/errorHandler')
+const { notFound, errorHandler } = require('./middleware/errorHandler')
 const sequelize = require('./dbConnection')
 
 const User = require('./models/User')
@@ -13,9 +13,9 @@ const Comment = require('./models/Comments')
 // const Relationship = require('./models/Relationship')
 const MyCoordinate = require('./models/MyCoordinates')
 const Reactions = require('./models/Reactions')
+const BlockUser = require('./models/BlockUser')
 const RecommendFriend = require('./models/RecommendFriend')
 const FriendRequest = require('./models/FriendRequest')
-const Friend = require('./models/Friend')
 const SearchRecent = require('./models/SearchRecent')
 const WatchVideo = require('./models/WatchVideo')
 const Video = require('./models/Video')
@@ -39,40 +39,40 @@ const { post } = require('./routes/users')
 const app = express()
 
 //CORS
-app.use(cors({credentials: true, origin: true})) 
+app.use(cors({ credentials: true, origin: true }))
 
 
 
 //RELATIONS USER:
 //1 to many relation between user and article
-User.hasMany(Article,{
-    onDelete: 'CASCADE'
+User.hasMany(Article, {
+  onDelete: 'CASCADE'
 })
 Article.belongsTo(User)
 //1 to many relation between user and notification
-User.hasMany(Notification,{
-    onDelete: 'CASCADE'
+User.hasMany(Notification, {
+  onDelete: 'CASCADE'
 })
 Notification.belongsTo(User)
 //many to many relation between user and user => create table Friend
 
 User.belongsToMany(User, {
-    through: 'Relationship',
-    as: 'user1',
-    foreignKey: 'user1_id',
-    otherKey: 'user2_id'
-  });
-  
-  User.belongsToMany(User, {
-    through: 'Relationship',
-    as: 'user2',
-    foreignKey: 'user2_id',
-    otherKey: 'user1_id'
-  });
+  through: 'Relationship',
+  as: 'user1',
+  foreignKey: 'user1_id',
+  otherKey: 'user2_id'
+});
+
+User.belongsToMany(User, {
+  through: 'Relationship',
+  as: 'user2',
+  foreignKey: 'user2_id',
+  otherKey: 'user1_id'
+});
 
 //1 to 1 relation between user and coordinate
-User.hasOne(MyCoordinate,{
-    onDelete: 'CASCADE'
+User.hasOne(MyCoordinate, {
+  onDelete: 'CASCADE'
 })
 MyCoordinate.belongsTo(User)
 // //1 to many relation between Article and photo
@@ -81,122 +81,125 @@ MyCoordinate.belongsTo(User)
 // })
 // PhotoInPost.belongsTo(User)
 //1 to many relation between User and Comments
-User.hasMany(Comment,{onDelete: 'CASCADE'})
+User.hasMany(Comment, { onDelete: 'CASCADE' })
 Comment.belongsTo(User)
 //many to many relationship between user and user => create table friendRecommend
 User.belongsToMany(User, {
-    through: 'FriendRecommend',
-    as: 'recommend_user1',
-    foreignKey: 'user1_id',
-    otherKey: 'user2_id'
-  });
-  
-  User.belongsToMany(User, {
-    through: 'FriendRecommend',
-    as: 'recommend_user2',
-    foreignKey: 'user2_id',
-    otherKey: 'user1_id'
-  });
+  through: 'FriendRecommend',
+  as: 'recommend_user1',
+  foreignKey: 'user1_id',
+  otherKey: 'user2_id'
+});
+
+User.belongsToMany(User, {
+  through: 'FriendRecommend',
+  as: 'recommend_user2',
+  foreignKey: 'user2_id',
+  otherKey: 'user1_id'
+});
 
 //many to many relationship between user and user => create table friendRequest
 User.belongsToMany(User, {
-    through: 'FriendRequest',
-    as: 'send_user',
-    foreignKey: 'send_user_email',
-    otherKey: 'receive_user_email'
-  });
-  
-  User.belongsToMany(User, {
-    through: 'FriendRequest',
-    as: 'receive_user',
-    foreignKey: 'receive_user_email',
-    otherKey: 'send_user_email'
-  });
+  through: 'FriendRequest',
+  as: 'send_user',
+  foreignKey: 'send_user_email',
+  otherKey: 'receive_user_email'
+});
+
+User.belongsToMany(User, {
+  through: 'FriendRequest',
+  as: 'receive_user',
+  foreignKey: 'receive_user_email',
+  otherKey: 'send_user_email'
+});
 
 //1 to many relation between User and SearchRecent
-User.hasMany(SearchRecent,{onDelete: 'CASCADE'})
+User.hasMany(SearchRecent, { onDelete: 'CASCADE' })
 SearchRecent.belongsTo(User)
 
 //1 to many relation between User and PostReport
-User.hasOne(PostReport,{onDelete: 'CASCADE'})
+User.hasOne(PostReport, { onDelete: 'CASCADE' })
 PostReport.belongsTo(User)
 
 //RELATIONS POST:
 //1 to 1 relation between Article and Reaction
-Article.hasOne(Reactions,{
-    onDelete: 'CASCADE'
+Article.hasOne(Reactions, {
+  onDelete: 'CASCADE'
 })
 Reactions.belongsTo(Article)
 //1 to 1 relation between Article and PostReport
-Article.hasOne(PostReport,{
-    onDelete: 'CASCADE'
+Article.hasOne(PostReport, {
+  onDelete: 'CASCADE'
 })
 PostReport.belongsTo(Article)
 //1 to many relation between article and comment
-Article.hasMany(Comment,{
-    onDelete: 'CASCADE'
+Article.hasMany(Comment, {
+  onDelete: 'CASCADE'
 })
 Comment.belongsTo(Article)
 //1 to many relation between article and noti
-Article.hasMany(Notification,{
-    onDelete: 'CASCADE'
+Article.hasMany(Notification, {
+  onDelete: 'CASCADE'
 })
 Notification.belongsTo(Article)
 //1 to many relation between article and photo
-Article.hasMany(PhotoInPost,{
-    onDelete: 'CASCADE'
+Article.hasMany(PhotoInPost, {
+  onDelete: 'CASCADE'
 })
 PhotoInPost.belongsTo(Article)
 
 //RELATIONS WatchVideo:
 //1 to 1 relation between WatchVideo and Video
-WatchVideo.hasOne(Video,{
-    onDelete: 'CASCADE'
+WatchVideo.hasOne(Video, {
+  onDelete: 'CASCADE'
 })
 Video.belongsTo(WatchVideo)
-//1 to 1 relation between WatchVideo and Reaction
-WatchVideo.hasOne(Reactions,{
-    onDelete: 'CASCADE'
-})
-Reactions.belongsTo(WatchVideo)
-//1 to many relation between WatchVideo and comment
-WatchVideo.hasMany(Comment,{
-    onDelete: 'CASCADE'
-})
-Comment.belongsTo(WatchVideo)
-
 
 //many to many relation between Message and User
 User.belongsToMany(User, {
-    through: 'Message',
-    as: 'sender_message_id',
-    foreignKey: 'sender_id',
-    otherKey: 'receiver_id'
-  });
-  
-  User.belongsToMany(User, {
-    through: 'Message',
-    as: 'receiver_message_id',
-    foreignKey: 'receiver_id',
+  through: 'Message',
+  as: 'sender_message_id',
+  foreignKey: 'sender_id',
+  otherKey: 'receiver_id'
+});
+
+User.belongsToMany(User, {
+  through: 'Message',
+  as: 'receiver_message_id',
+  foreignKey: 'receiver_id',
   otherKey: 'sender_id'
-  });
+});
 //many to many Friend relation between user and User
 User.belongsToMany(User, {
-    through: 'Friend',
-    as: 'emailFriend1',
-    foreignKey: 'user1_email',
-    otherKey: 'user2_email'
-  });
-  
-  User.belongsToMany(User, {
-    through: 'Friend',
-    as: 'emailFriend2',
-    foreignKey: 'user2_email',
-    otherKey: 'user1_email'
-  });
+  through: 'Friend',
+  as: 'emailFriend1',
+  foreignKey: 'user1_email',
+  otherKey: 'user2_email'
+});
+
+User.belongsToMany(User, {
+  through: 'Friend',
+  as: 'emailFriend2',
+  foreignKey: 'user2_email',
+  otherKey: 'user1_email'
+});
+//many to many Block user relation between user and User
+User.belongsToMany(User, {
+  through: BlockUser,
+  as: 'emailBlock1',
+  foreignKey: 'user1_email',
+  otherKey: 'user2_email'
+});
+
+User.belongsToMany(User, {
+  through: BlockUser,
+  as: 'emailBlock2',
+  foreignKey: 'user2_email',
+  otherKey: 'user1_email' 
+});
 //1 to many relation between Chat and Message
-Chat.hasMany(Message,{
-    onDelete: 'CASCADE'
+Chat.hasMany(Message, {
+  onDelete: 'CASCADE'
 })
 Message.belongsTo(Chat)
 Article.hasMany(Tag)
@@ -214,7 +217,7 @@ Reactions.belongsTo(User)
 //     foreignKey: 'sender_id',
 //     otherKey: 'receiver_id'
 //   });
-  
+
 //   User.belongsToMany(User, {
 //     through: 'Chat',
 //     as: 'receiver_message_id',
@@ -242,25 +245,25 @@ sync();
 app.use(express.json())
 app.use(morgan('tiny'))
 
-app.get('/',(req,res) => {
-    res.json({status:"API is running"});
+app.get('/', (req, res) => {
+  res.json({ status: "API is running" });
 })
-app.use('/',userRoute)
-app.use('/',friendRoute)
-app.use('/',utils)
-app.use('/',articleRoute)
-app.use('/articles',commentRoute)
-app.use('/api/tags',tagRoute)
-app.use('/api/profiles',profileRoute)
-app.use('/api/articles',favouriteRoute)
+app.use('/', userRoute)
+app.use('/', friendRoute)
+app.use('/', utils)
+app.use('/', articleRoute)
+app.use('/articles', commentRoute)
+app.use('/api/tags', tagRoute)
+app.use('/api/profiles', profileRoute)
+app.use('/api/articles', favouriteRoute)
 app.use(notFound)
 app.use(errorHandler)
 
 //user route
-app.use('/api/articles',favouriteRoute)
+app.use('/api/articles', favouriteRoute)
 
 const PORT = process.env.PORT || 8080
 
-app.listen(PORT,() => {
-    console.log(`Server running on http://localhost:8080`);
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:8080`);
 })

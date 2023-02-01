@@ -1,6 +1,7 @@
 const { databaseVersion } = require('../dbConnection');
 const User = require('../models/User');
 const Friend = require('../models/Friend');
+const BlockUser = require('../models/BlockUser');
 const { hashPassword, matchPassword } = require('../utils/password')
 const { sign, decode } = require('../utils/jwt')
 const { ValidateEmail } = require("../utils/emailValidator")
@@ -149,6 +150,85 @@ module.exports.editUser = async (req, res) => {
 
 }
 
+//user1 block user2 (default)
+module.exports.blockUser = async (req, res) => {
+    try {
+        const userBeBlocked = req.params.user2;
+        const user1 = await User.findByPk(req.user.email)
+        const user2 = await User.findByPk(userBeBlocked)
+        if (!user1) {
+            res.status(401)
+            throw new Error('No current user with this email id.')
+        }
+
+        if (!user2) {
+            res.status(401)
+            throw new Error('The user you gonna block is not exist.')
+        }
+
+        const existBlock = await BlockUser.findOne({ where: { user2_email: userBeBlocked } });
+        console.log(existBlock)
+        if (existBlock) res.json({ message: "This user has already been blocked." });
+        else {
+            let block = new BlockUser();
+            block.user1_email = req.user.email;
+            block.user2_email = userBeBlocked;
+            block.save();
+            res.status(200).json({ message: "Block this user successfully" })
+        }
+    } catch (e) {
+        const status = res.statusCode ? res.statusCode : 500
+        return res.status(status).json({
+            errors: { body: [e.message] }
+        })
+    }
+
+}
+//user1 unblock user2 (default)
+module.exports.unBlockUser = async (req, res) => {
+    try {
+        const userBeBlocked = req.params.user2;
+        const user1 = await User.findByPk(req.user.email)
+        const user2 = await User.findByPk(userBeBlocked)
+        if (!user1) {
+            res.status(401)
+            throw new Error('No current user with this email id.')
+        }
+
+        if (!user2) {
+            res.status(401)
+            throw new Error('The user you gonna unblock is not exist.')
+        }
+
+        const existBlock = await BlockUser.findOne({
+            where: {
+                [Op.and]: [
+                    { user1_email: req.user.email },
+                    { user2_email: userBeBlocked },
+                ]
+            }
+        });
+        if (!existBlock) res.json({ message: "You haven't blocked this account" });
+        else {
+            await BlockUser.destroy({
+                where: {
+                    [Op.and]: [
+                        { user1_email: req.user.email },
+                        { user2_email: userBeBlocked },
+                    ]
+                }
+            })
+            res.json({message: "Unblock this account successfully"})
+        }
+    } catch (e) {
+        const status = res.statusCode ? res.statusCode : 500
+        return res.status(status).json({
+            errors: { body: [e.message] }
+        })
+    }
+
+}
+
 module.exports.changePassword = async (req, res) => {
     try {
         const user = await User.findByPk(req.user.email)
@@ -192,6 +272,36 @@ module.exports.getSpecificUser = async (req, res) => {
     }
 }
 
+module.exports.getUserInfo = async (req, res) => {
+    try {
+        const userEmail = req.params.emailid;
+        const user = await User.findByPk(userEmail)
+        if (!user) {
+            res.status(401)
+            throw new Error('No user with this email id')
+        }
+        const currentUser = req.user.email;
+        const block = await BlockUser.findOne({
+            where: {
+                [Op.or]: [
+                    { user1_email: userEmail },
+                    { user1_email: currentUser },
+                ]
+            }
+        })
+        if (block) res.json({ message: "You have blocked or been blocked this account" })
+        else {
+            delete user.dataValues.hash_password;
+            res.status(200).json(user);
+        }
+    } catch (e) {
+        const status = res.statusCode ? res.statusCode : 500
+        return res.status(status).json({
+            errors: { body: [e.message] }
+        })
+    }
+}
+
 module.exports.setBlock = async (req, res) => {
     try {
         const user = await User.findByPk(req.user.email)
@@ -218,10 +328,10 @@ module.exports.search = async (req, res) => {
         const userList = await User.findAll({
             logging: console.log,
             where: {
-                [Op.or] : [
-                    {first_name: {[Op.like] : '%' + searchName + '%'}},
-                    { last_name: {[Op.like] : '%' + searchName + '%'}},
-                    { sub_name: {[Op.like] : '%' + searchName + '%'}},
+                [Op.or]: [
+                    { first_name: { [Op.like]: '%' + searchName + '%' } },
+                    { last_name: { [Op.like]: '%' + searchName + '%' } },
+                    { sub_name: { [Op.like]: '%' + searchName + '%' } },
                 ]
             }
         })
