@@ -17,6 +17,7 @@ const BlockUser = require('./models/BlockUser')
 const RecommendFriend = require('./models/RecommendFriend')
 const FriendRequest = require('./models/FriendRequest')
 const SearchRecent = require('./models/SearchRecent')
+const articleReport = require('./models/articleReport')
 const WatchVideo = require('./models/WatchVideo')
 const Video = require('./models/Video')
 const BackgroundColor = require('./models/BackgroundColor')
@@ -210,6 +211,13 @@ Tag.belongsTo(Article, {
 
 User.hasMany(Reactions)
 Reactions.belongsTo(User)
+
+User.hasMany(articleReport)
+articleReport.belongsTo(User)
+
+Article.hasMany(articleReport)
+articleReport.belongsTo(Article)
+
 //1 to many relation between Chat and Member
 // User.belongsToMany(User, {
 //     through: 'Chat',
@@ -238,7 +246,10 @@ Reactions.belongsTo(User)
 
 
 
-const sync = async () => await sequelize.sync({});
+const sync = async () =>{
+  console.log("sync db")
+  await sequelize.sync({alter: true});
+} 
 sync();
 
 
