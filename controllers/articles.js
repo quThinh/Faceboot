@@ -8,6 +8,7 @@ const sequelize = require('../dbConnection');
 const { uuid } = require('uuidv4');
 const { where } = require('sequelize');
 const { serialize } = require('pg-protocol');
+const ArticleReport = require('../models/articleReport');
 
 function sanitizeOutput(article, user) {
 	const newTagList = [];
@@ -81,7 +82,6 @@ module.exports.createArticle = async (req, res) => {
 
 
 		article = await Article.findByPk(slug, { include: Tag });
-		article = sanitizeOutput(article, user);  // @todo Set tag for article
 		res.status(201).json({ article });
 	} catch (e) {
 		return res.status(422).json({
@@ -148,6 +148,50 @@ module.exports.updateArticle = async (req, res) => {
 		const code = res.statusCode ? res.statusCode : 422;
 		return res.status(code).json({
 			errors: { body: ['Could not update article', e.message] },
+		});
+	}
+};
+module.exports.reportArticle = async (req, res) => {
+	try {
+		const content = req.body.content
+		const data = req.body.id;
+		let article = await Article.findByPk(data);
+
+		if (!article) {
+			res.status(404);
+			throw new Error('Article not found');
+		}
+
+		const numberOfBlock = await ArticleReport.findAll({
+			where:
+			{
+				UserEmail: req.user.email,
+				ArticleId: data
+			}
+		})
+		if( numberOfBlock.length > 3 ){
+			res.status(400).json({message: "You have reached the maximum report of this article"})
+			return;
+		}
+		const user = await User.findByPk(req.user.email)
+		let Report = new ArticleReport;
+		Report.ArticleId = data;
+		Report.UserEmail = req.user.email;
+		Report.content = content;
+		await Report.save()
+		Report = Report.dataValues;
+		delete Report.UserEmail
+		var userReport = {
+			"avatar_url": user.avatar_url,
+			"id": req.user.email,
+			"first_name": user.first_name,
+		}
+		Report["userReport"] = userReport;
+		res.status(200).json({ Report });
+	} catch (e) {
+		const code = res.statusCode ? res.statusCode : 422;
+		return res.status(code).json({
+			errors: { body: ['Could not Report article', e.message] },
 		});
 	}
 };
@@ -288,16 +332,16 @@ module.exports.getAllArticles = async (req, res) => {
 			var articleTmp = {
 				"id": article[i].dataValues.id,
 				"image": article[i].dataValues.image,
-				"content": article[i].dataValues.content, 
+				"content": article[i].dataValues.content,
 				"User": article[i].dataValues.User,
-				"create_at":article[i].dataValues.create_at, 
+				"create_at": article[i].dataValues.create_at,
 				"reactions": reaction,
-				"comments": cmts 
+				"comments": cmts
 			}
 			articleData.push(articleTmp)
-		}	 
+		}
 
-		res.json({ articleData});
+		res.json({ articleData });
 	} catch (e) {
 		const code = res.statusCode ? res.statusCode : 422;
 		return res.status(code).json({
