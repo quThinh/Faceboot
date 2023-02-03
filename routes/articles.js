@@ -10,8 +10,9 @@ router.post('/articles',authByToken ,ArticleController.createArticle)
 router.patch('/articles/:id', authByToken,ArticleController.updateArticle)
 router.get('/articles/:id', ArticleController.getDetailArticleById)
 router.post('/articles/report',authByToken, ArticleController.reportArticle)
+router.get('/articles/:articleId/:userEmail', authByToken, ArticleController.getArticleDetail)
+router.delete('/articles/:articleId', authByToken, ArticleController.deleteArticle)
 
-router.get('/articles/user/:id', ArticleController.getAllArticles)
 // router.post('/articles/censor/:id', ArticleController.getAllArticles)
 
 module.exports = router

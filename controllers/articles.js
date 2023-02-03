@@ -6,10 +6,11 @@ const Comment = require('../models/Comments')
 const { slugify } = require('../utils/stringUtil');
 const sequelize = require('../dbConnection');
 const { uuid } = require('uuidv4');
-const { where } = require('sequelize');
+const { where, Sequelize } = require('sequelize');
 const { serialize } = require('pg-protocol');
 const ArticleReport = require('../models/articleReport');
-
+const BlockUser = require('../models/BlockUser');
+const Op = Sequelize.Op;
 function sanitizeOutput(article, user) {
 	const newTagList = [];
 	for (let t of article.dataValues.Tags) {
@@ -169,8 +170,8 @@ module.exports.reportArticle = async (req, res) => {
 				ArticleId: data
 			}
 		})
-		if( numberOfBlock.length > 3 ){
-			res.status(400).json({message: "You have reached the maximum report of this article"})
+		if (numberOfBlock.length > 3) {
+			res.status(400).json({ message: "You have reached the maximum report of this article" })
 			return;
 		}
 		const user = await User.findByPk(req.user.email)
@@ -198,8 +199,14 @@ module.exports.reportArticle = async (req, res) => {
 
 module.exports.deleteArticle = async (req, res) => {
 	try {
-		const slugInfo = req.params.slug;
-		let article = await Article.findByPk(slugInfo, { include: Tag });
+		const articId = req.params.articleId;
+		console.log(articId)
+		const userEmail = req.user.email;
+		let article = await Article.findOne({
+			where:{
+				id: articId,
+			}
+		});
 
 		if (!article) {
 			res.status(404);
@@ -213,7 +220,7 @@ module.exports.deleteArticle = async (req, res) => {
 			throw new Error('You must be the author to modify this article');
 		}
 
-		await Article.destroy({ where: { slug: slugInfo } });
+		await article.destroy();
 		res.status(200).json({ message: 'Article deleted successfully' });
 	} catch (e) {
 		const code = res.statusCode ? res.statusCode : 422;
@@ -351,35 +358,82 @@ module.exports.getAllArticles = async (req, res) => {
 	};
 }
 
-module.exports.getFeed = async (req, res) => {
+module.exports.getArticleDetail = async (req, res) => {
 	try {
-		const query = `
-            SELECT UserEmail
-            FROM followers
-            WHERE followerEmail = "${req.user.email}"`;
-		const followingUsers = await sequelize.query(query);
-		if (followingUsers[0].length == 0) {
-			return res.json({ articles: [] });
-		}
-		let followingUserEmail = [];
-		for (let t of followingUsers[0]) {
-			followingUserEmail.push(t.UserEmail);
-		}
-
-		let article = await Article.findAll({
+		const articleId = req.params.articleId;
+		const userEmail = req.params.userEmail;
+		const block = await BlockUser.findOne({
 			where: {
-				UserEmail: followingUserEmail,
+				[Op.or]: [
+					{ user1_email: req.user.email, user2_email: userEmail },
+					{ user1_email: userEmail, user2_email: req.user.email },
+				]
+			}
+		})
+		
+		if (block) {
+			res.status(401)
+			throw new Error('Can not find this account')
+		}
+		
+		
+		let article = await Article.findOne({
+			where: {
+				id: articleId,
+				UserEmail: userEmail
 			},
-			include: [Tag, User],
+			include: [
+				{
+					model: User, attributes: ['email', 'intro_txt', 'avatar_url'], where: { email: userEmail },
+				},
+			]
 		});
-
-		let articles = [];
-		for (let t of article) {
-			let addArt = sanitizeOutputMultiple(t);
-			articles.push(addArt);
+		if (!article) {
+			res.status(401)
+			throw new Error('Can not find this article')
+		}
+		
+		console.log(article);
+		article = article.dataValues;
+		var comments = await Comment.findAll({
+			where: {
+				ArticleId: article.id
+			},
+			include: [
+				{
+					model: User,
+					attributes: ['email', 'intro_txt', 'avatar_url']
+				}
+			]
+		})
+		cmts = comments.map((e) => e.dataValues)
+		loveQuery = `SELECT COUNT(react) as amount FROM Reactions WHERE Reactions.ArticleId = "${article.id}" and Reactions.react = 1 GROUP BY react`;
+		likeQuery = `SELECT COUNT(react) as amount FROM Reactions WHERE Reactions.ArticleId = "${article.id}" and Reactions.react = 2 GROUP BY react`;
+		hahaQuery = `SELECT COUNT(react) as amount FROM Reactions WHERE Reactions.ArticleId = "${article.id}" and Reactions.react = 3 GROUP BY react`;
+		var loveData = await sequelize.query(loveQuery)
+		var hahaData = await sequelize.query(hahaQuery)
+		var likeData = await sequelize.query(likeQuery)
+		var loveJson = loveData[0].map((e) => e.amount)
+		var likeQuery = await sequelize.query(likeQuery)
+		var likeJson = likeData[0].map((e) => e.amount)
+		var hahaQuery = await sequelize.query(hahaQuery)
+		var hahaJson = hahaData[0].map((e) => e.amount)
+		var reaction = {
+			"love": loveJson[0],
+			"like": likeJson[0],
+			"haha": hahaJson[0]
 		}
 
-		res.json({ articles });
+		var articleTmp = {
+			"id": article.id,
+			"image": article.image,
+			"content": article.content,
+			"User": article.User,
+			"create_at": article.create_at,
+			"reactions": reaction,
+			"comments": cmts
+		}
+		res.json({ articleTmp });
 	} catch (e) {
 		const code = res.statusCode ? res.statusCode : 422;
 		return res.status(code).json({
