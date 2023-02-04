@@ -441,3 +441,50 @@ module.exports.getArticleDetail = async (req, res) => {
 		});
 	}
 };
+
+module.exports.searchArticle = async (req, res) => {
+	try {
+		const userEmail = req.user.email;
+		let query = String(req.params.keyword);
+		let filteredPosts = await Article.findAll();
+		filteredPosts = filteredPosts.map(e => e.dataValues);
+		if(!filteredPosts.length){
+			res.status(404).json({message: "there is now article"})
+		}
+		query = query.toLowerCase();
+		console.log(userEmail)
+		if (query) {
+		  filteredPosts = filteredPosts.filter(e =>
+			e.title.toLowerCase().includes(query) ||
+			e.UserEmail.toLowerCase().includes(query) ||
+			e.content.toLowerCase().includes(query)
+		  );
+		}
+		let block = await BlockUser.findAll({
+            where: {
+                [Op.or]: [
+                    { user1_email: userEmail },
+                    { user2_email: userEmail }
+                ]
+            }
+        })
+        let blockUser = [];
+        if(block.length){
+            for (let i = 0; i < block.length; i++) {
+                if (block[i].user1_email == userEmail) blockUser.push(block[i].user2_email);
+                else blockUser.push(block[i].user1_email);
+            }
+        }
+
+		filteredPosts = filteredPosts.filter(e =>
+			!blockUser.includes(e.UserEmail)
+		  );
+		console.log(query)
+		res.json({ filteredPosts });
+	} catch (e) {
+		const code = res.statusCode ? res.statusCode : 422;
+		return res.status(code).json({
+			errors: { body: ['Could not get feed ', e.message] },
+		});
+	}
+};

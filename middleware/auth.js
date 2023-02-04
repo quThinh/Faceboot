@@ -1,7 +1,7 @@
 const {decode} = require('../utils/jwt')
 
 module.exports.authByToken = async (req,res,next) => {
-    
+    console.log("auth")
     //Check for Authorization header
     const authHeader = req.header('Authorization') ? req.header('Authorization').split(' ') : null
     if(!authHeader){
