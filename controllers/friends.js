@@ -5,15 +5,76 @@ const { hashPassword, matchPassword } = require('../utils/password')
 const { sign, decode } = require('../utils/jwt')
 const FriendRequest = require('../models/FriendRequest')
 const { uuid } = require('uuidv4');
+const sequelize = require('../dbConnection');
 var Sequelize = require('sequelize');
 const Op = Sequelize.Op;
-
+const BlockUser = require('../models/BlockUser')
 const checkUser = async (emailId) => {
     const user = await User.findOne({emailId});
     if (!user) return false;
     return true;
 }
+//recommned friend
+module.exports.recommendFriend = async (req, res) => {
+    try {
+        const userEmail = req.user.email;
+        let FriendList = await Friend.findAll({
+            where: {
+                [Op.or]: [
+                    { user1_email: userEmail },
+                    { user2_email: userEmail }
+                ]
+            }
+        })
+        
+        FriendList = FriendList.map((e) => e.dataValues)
+        let alreadyFriend = []
+        if(FriendList.length){
+            for (let i = 0; i < FriendList.length; ++i) {
+                if (FriendList[i].user1_email == userEmail) alreadyFriend.push(FriendList[i].user2_email);
+                else alreadyFriend.push(FriendList[i].user1_email);
+            }
+        }
+        let block = await BlockUser.findAll({
+            where: {
+                [Op.or]: [
+                    { user1_email: userEmail },
+                    { user2_email: userEmail }
+                ]
+            }
+        })
+        let blockUser = [];
+        if(block.length){
+            for (let i = 0; i < block.length; i++) {
+                if (block[i].user1_email == userEmail) blockUser.push(block[i].user2_email);
+                else blockUser.push(block[i].user1_email);
+            }
+        }
+        
+        console.log(blockUser, alreadyFriend);
+        let recommendFriend = await User.findAll({
+            where:{
+                email: { [Op.and] : [{[Op.ne]:userEmail},
+                    {[Op.notIn]: alreadyFriend},
+                    {[Op.notIn]: blockUser},]
+                    
+                }
+            }
+        })
+        // let recQuery = `SELECT * FROM users WHERE users.email NOT LIKE ["${userEmail}"] and users.email NOT IN [${String(alreadyFriend)}] and user.email NOT IN [${String(blockUser)}]`;
+        // let recFriend = await sequelize.query(recQuery)
+        recommendFriend = recommendFriend.map(e => e.dataValues)
+        // console.log(recommendFriend)
+        // var loveJson = loveData[0].map((e) => e.amount)
+        res.json({ recommendFriend })
+    } catch (e) {
+        const status = res.statusCode ? res.statusCode : 500
+        return res.status(status).json({
+            errors: { body: [e.message] }
+        })
+    }
 
+}
 module.exports.sendRequest = async (req, res) => {
     try {
         const receiveUser = req.params.receiveUser;

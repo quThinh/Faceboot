@@ -7,6 +7,7 @@ const { sign, decode } = require('../utils/jwt')
 const { ValidateEmail } = require("../utils/emailValidator")
 const { uuid } = require('uuidv4');
 const { query } = require('express');
+const sequelize = require('../dbConnection');
 var Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
@@ -217,7 +218,7 @@ module.exports.unBlockUser = async (req, res) => {
                     ]
                 }
             })
-            res.json({message: "Unblock this account successfully"})
+            res.json({ message: "Unblock this account successfully" })
         }
     } catch (e) {
         const status = res.statusCode ? res.statusCode : 500
@@ -227,6 +228,7 @@ module.exports.unBlockUser = async (req, res) => {
     }
 
 }
+
 
 module.exports.changePassword = async (req, res) => {
     try {

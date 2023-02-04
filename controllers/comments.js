@@ -1,7 +1,7 @@
 const Article = require('../models/Article')
 const User = require('../models/User')
 const Comment = require('../models/Comments')
-const { uuid } = require('uuidv4')
+const { v4 } = require('uuidv4')
 
 module.exports.postNewComment = async (req, res) => {
     try {
@@ -32,7 +32,7 @@ module.exports.postNewComment = async (req, res) => {
         }
 
         //Create new Comment
-        const newUUID = uuid()
+        const newUUID = v4()
         const newComment = await Comment.create({ id: newUUID, content: data.body })
 
         //Find user

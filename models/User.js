@@ -3,7 +3,7 @@ const sequelize = require('../dbConnection')
 
 const User = sequelize.define('User', {
     id: {
-        type: DataTypes.STRING(100),
+        type: DataTypes.STRING(50),
         unique: true,  
         allowNull: false,
         // primaryKey: true,
@@ -66,15 +66,11 @@ const User = sequelize.define('User', {
         allowNull: true,
     },
     cover_url: {
-        type: DataTypes.STRING(50),
+        type: DataTypes.STRING(200),
         allowNull: true,
     },
     avatar_url: {
-        type: DataTypes.STRING(100),
-        allowNull: true,
-    },
-    avatar_url: {
-        type: DataTypes.STRING(100),
+        type: DataTypes.STRING(200),
         allowNull: true,
     },
     //0 is unblock, 1 is block

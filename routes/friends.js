@@ -11,6 +11,7 @@ router.patch('/friends/cancel-request/:emailId', authByToken, FriendController.c
 // router.get('/friends/set-remove', authByToken, FriendController.removeRequest)       
 router.get('/friends/list', authByToken, FriendController.getAllFriend)      
 router.get('/friends/list/:emailId', FriendController.getAllFriendUser)     
+router.get('/friends/recommend',authByToken , FriendController.recommendFriend)       //search when loggined
 // router.get('/friends/get-recommends', authByToken, FriendController.getAllRecommend)       
 
 module.exports = router

@@ -12,6 +12,7 @@ router.get('/articles/:id', ArticleController.getDetailArticleById)
 router.post('/articles/report',authByToken, ArticleController.reportArticle)
 router.get('/articles/:articleId/:userEmail', authByToken, ArticleController.getArticleDetail)
 router.delete('/articles/:articleId', authByToken, ArticleController.deleteArticle)
+router.post('/articles/search/keyword=?', ArticleController.deleteArticle)
 
 // router.post('/articles/censor/:id', ArticleController.getAllArticles)
 
