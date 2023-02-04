@@ -70,7 +70,11 @@ const User = sequelize.define('User', {
         allowNull: true,
     },
     avatar_url: {
-        type: DataTypes.STRING(50),
+        type: DataTypes.STRING(100),
+        allowNull: true,
+    },
+    avatar_url: {
+        type: DataTypes.STRING(100),
         allowNull: true,
     },
     //0 is unblock, 1 is block

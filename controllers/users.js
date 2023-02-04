@@ -39,7 +39,6 @@ module.exports.createUser = async (req, res) => {
             relationship: req.body.relationship,
             learn_at: req.body.learn_at,
             from: req.body.from,
-            follower: req.body.follower,
             avatar_url: req.body.avatar_url,
         })
         if (user) {
