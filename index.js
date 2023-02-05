@@ -26,6 +26,8 @@ const PostReport = require('./models/PostReport')
 const Chat = require('./models/Chat')
 const Message = require('./models/Message')
 const Notification = require('./models/Notification')
+const NotificationChange = require('./models/NotificationChanges')
+const NotificationObject = require('./models/NotificationObject')
 const userRoute = require('./routes/users')
 const friendRoute = require('./routes/friends')
 const articleRoute = require('./routes/articles')
@@ -35,6 +37,7 @@ const profileRoute = require('./routes/profile')
 const favouriteRoute = require('./routes/favourites')
 const utils = require('./routes/utils')
 const reactionRoute = require('./routes/reaction')
+const notificationRoute = require('./routes/notification')
 const { post } = require('./routes/users')
 
 const app = express()
@@ -54,8 +57,25 @@ Article.belongsTo(User)
 User.hasMany(Notification, {
   onDelete: 'CASCADE'
 })
-Notification.belongsTo(User)
-//many to many relation between user and user => create table Friend
+Notification.belongsTo(User
+)
+// many to many relation between user and user => create table Friend
+
+User.hasMany(NotificationChange, {
+  onDelete: 'CASCADE',
+})
+
+NotificationChange.belongsTo(
+  User
+)
+
+NotificationObject.hasOne(NotificationChange)
+
+NotificationObject.hasMany(Notification)
+Notification.belongsTo(NotificationObject)
+
+
+
 
 User.belongsToMany(User, {
   through: 'Relationship',
@@ -139,10 +159,10 @@ Article.hasMany(Comment, {
 })
 Comment.belongsTo(Article)
 //1 to many relation between article and noti
-Article.hasMany(Notification, {
+Article.hasMany(NotificationObject, {
   onDelete: 'CASCADE'
 })
-Notification.belongsTo(Article)
+NotificationObject.belongsTo(Article)
 //1 to many relation between article and photo
 Article.hasMany(PhotoInPost, {
   onDelete: 'CASCADE'
@@ -170,6 +190,7 @@ User.belongsToMany(User, {
   foreignKey: 'receiver_id',
   otherKey: 'sender_id'
 });
+
 //many to many Friend relation between user and User
 User.belongsToMany(User, {
   through: 'Friend',
@@ -196,7 +217,7 @@ User.belongsToMany(User, {
   through: BlockUser,
   as: 'emailBlock2',
   foreignKey: 'user2_email',
-  otherKey: 'user1_email' 
+  otherKey: 'user1_email'
 });
 //1 to many relation between Chat and Message
 Chat.hasMany(Message, {
@@ -246,10 +267,10 @@ articleReport.belongsTo(Article)
 
 
 
-const sync = async () =>{
+const sync = async () => {
   console.log("sync db")
-  await sequelize.sync({alter: true});
-} 
+  await sequelize.sync({ alter: true });
+}
 sync();
 
 
@@ -263,7 +284,8 @@ app.use('/', userRoute)
 app.use('/', friendRoute)
 app.use('/', utils)
 app.use('/', articleRoute)
-app.use('/articles', commentRoute)
+app.use('/notifications', notificationRoute)
+app.use('/articlesComment', commentRoute)
 app.use('/api/tags', tagRoute)
 app.use('/api/profiles', profileRoute)
 app.use('/api/articles', favouriteRoute)
