@@ -1,7 +1,10 @@
 const Article = require('../models/Article')
 const User = require('../models/User')
+const Notification = require('../models/Notification')
 const Comment = require('../models/Comments')
-const { v4 } = require('uuidv4')
+const { uuid } = require('uuidv4')
+const NotificationObject = require('../models/NotificationObject')
+const NotificationChange = require('../models/NotificationChanges')
 
 module.exports.postNewComment = async (req, res) => {
     try {
@@ -27,12 +30,12 @@ module.exports.postNewComment = async (req, res) => {
 
         //Checking whthter this user has aldready posted a comment
         const existingComment = await Comment.findAll({ where: { UserEmail: req.user.email } })
-        if (existingComment.length > 0) {
-            throw new Error('You aldready added a review')
-        }
+        // if (existingComment.length > 0) {
+        //     throw new Error('You aldready added a review')
+        // }
 
         //Create new Comment
-        const newUUID = v4()
+        const newUUID = uuid()
         const newComment = await Comment.create({ id: newUUID, content: data.body })
 
         //Find user
@@ -48,6 +51,19 @@ module.exports.postNewComment = async (req, res) => {
             intro_txt: user.dataValues.intro_txt,
             avatar_url: user.dataValues.avatar_url,
         }
+        author = await User.findOne({
+            where: {
+                email: article.UserEmail
+            }
+        })
+
+        //Check notification exist
+
+        // Notification
+        const newNotificationObject = await NotificationObject.create({ notification_type: 101, create_at:Date.now()})
+        const newNotificationChange = await NotificationChange.create({NotificationObjectId: newNotificationObject.dataValues.id, UserEmail: user.dataValues.email})
+        const newNotification = await Notification.create({isSeen: false, NotificationObjectId: newNotificationObject.dataValues.id, UserEmail: author.dataValues.email})
+        article.addNotificationObject(newNotificationObject)
 
         res.status(201).json({ newComment })
 
@@ -61,6 +77,7 @@ module.exports.postNewComment = async (req, res) => {
 
 module.exports.getAllCommentsOfArticle = async (req, res) => {
     try {
+        console.log("Here")
         const article_id = req.params.article_id
 
         //Find for article

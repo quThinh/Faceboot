@@ -1,24 +1,17 @@
 const { DataTypes } = require('sequelize')
+const { uuid } = require('uuidv4')
 const sequelize = require('../dbConnection')
 
 const Notification = sequelize.define('Notification', {
     id: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        unique: true,  
         primaryKey: true,
+        autoIncrement: true,
     },
     isSeen: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
-    },
-    isPopular: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-    },
-    type:{
-        type: DataTypes.INTEGER,
-        allowNull: true,
     },
 })
 
