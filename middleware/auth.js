@@ -4,6 +4,7 @@ module.exports.authByToken = async (req,res,next) => {
     console.log("auth")
     //Check for Authorization header
     const authHeader = req.header('Authorization') ? req.header('Authorization').split(' ') : null
+    console.log(req.header('Authorization'))
     if(!authHeader){
         return res.status(422).json({
             errors: { body: [ 'Authorization failed', 'No Authorization header' ] }

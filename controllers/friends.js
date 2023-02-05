@@ -7,6 +7,7 @@ const FriendRequest = require('../models/FriendRequest')
 const { uuid } = require('uuidv4');
 const sequelize = require('../dbConnection');
 var Sequelize = require('sequelize');
+const { where } = require('sequelize');
 const Op = Sequelize.Op;
 const BlockUser = require('../models/BlockUser')
 const checkUser = async (emailId) => {
@@ -266,7 +267,20 @@ module.exports.getAllFriend = async (req, res) => {
                 ]
             }
         })
-        res.status(200).json({listFriend});
+        const setUserEmails = [...new Set(listFriend.reduce(((list, friend) => {
+            const {user1_email, user2_email} = friend;
+
+            if (user1_email === userEmailId) return [...list, user2_email];
+            return [...list, user1_email]
+        }), []))]
+        const listUser = await User.findAll({
+            where: {
+                email: {
+                    [Op.in]: setUserEmails
+                }
+            }
+        })
+        res.status(200).json({listUser});
     } catch (e) {
         const status = res.statusCode ? res.statusCode : 500
         return res.status(status).json({

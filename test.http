@@ -1,1 +1,3 @@
-GET url HTTP/1.1
+GET http://localhost:8080/friends/list HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im5oZDkxMUBnbWFpbC5jb20iLCJpYXQiOjE2NzU1MDM0NTB9.E8c5tAu8byjmqmiA5otQM7NvqlbjFgQBkLoQo-Wjp5w
+Content-Type: application/json
