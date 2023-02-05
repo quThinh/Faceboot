@@ -112,7 +112,46 @@ module.exports.getDetailArticleById = async (req, res) => {
 		var user = await User.findByPk(article.UserEmail)
 		article = sanitizeOutput(article, user); // @todo Set tag for article
 
-		res.status(200).json({ article });
+		var comments = await Comment.findAll({
+			where: {
+				ArticleId: article.dataValues.id
+			},
+			include: [
+				{
+					model: User,
+					attributes: ['email', 'intro_txt', 'avatar_url']
+				}
+			]
+		})
+		cmts = comments.map((e) => e.dataValues)
+		loveQuery = `SELECT COUNT(react) as amount FROM Reactions WHERE Reactions.ArticleId = "${article.dataValues.id}" and Reactions.react = 1 GROUP BY react`;
+		likeQuery = `SELECT COUNT(react) as amount FROM Reactions WHERE Reactions.ArticleId = "${article.dataValues.id}" and Reactions.react = 2 GROUP BY react`;
+		hahaQuery = `SELECT COUNT(react) as amount FROM Reactions WHERE Reactions.ArticleId = "${article.dataValues.id}" and Reactions.react = 3 GROUP BY react`;
+		var loveData = await sequelize.query(loveQuery)
+		var hahaData = await sequelize.query(hahaQuery)
+		var likeData = await sequelize.query(likeQuery)
+		var loveJson = loveData[0].map((e) => e.amount)
+		var likeQuery = await sequelize.query(likeQuery)
+		var likeJson = likeData[0].map((e) => e.amount)
+		var hahaQuery = await sequelize.query(hahaQuery)
+		var hahaJson = hahaData[0].map((e) => e.amount)
+		var reaction = {
+			"love": loveJson[0],
+			"like": likeJson[0],
+			"haha": hahaJson[0]
+		}
+
+		var articleTmp = {
+			"id": article.dataValues.id,
+			"image": article.dataValues.image,
+			"content": article.dataValues.content,
+			"User": article.dataValues.User,
+			"create_at": article.dataValues.create_at,
+			"reactions": reaction,
+			"comments": cmts
+		}
+
+		res.status(200).json({ articleTmp });
 	} catch (e) {
 		return res.status(422).json({
 			errors: { body: ['Could not get article', e.message] },
