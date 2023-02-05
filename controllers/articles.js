@@ -203,7 +203,7 @@ module.exports.deleteArticle = async (req, res) => {
 		console.log(articId)
 		const userEmail = req.user.email;
 		let article = await Article.findOne({
-			where:{
+			where: {
 				id: articId,
 			}
 		});
@@ -235,7 +235,6 @@ module.exports.getAllArticles = async (req, res) => {
 		//Get all articles:
 		const { tag, author, limit = 20, offset = 0 } = req.query;
 		let article;
-		console.log(author, tag)
 		if (!author && tag) {
 			article = await Article.findAll({
 				include: [
@@ -370,13 +369,13 @@ module.exports.getArticleDetail = async (req, res) => {
 				]
 			}
 		})
-		
+
 		if (block) {
 			res.status(401)
 			throw new Error('Can not find this account')
 		}
-		
-		
+
+
 		let article = await Article.findOne({
 			where: {
 				id: articleId,
@@ -392,7 +391,7 @@ module.exports.getArticleDetail = async (req, res) => {
 			res.status(401)
 			throw new Error('Can not find this article')
 		}
-		
+
 		console.log(article);
 		article = article.dataValues;
 		var comments = await Comment.findAll({
@@ -444,42 +443,44 @@ module.exports.getArticleDetail = async (req, res) => {
 
 module.exports.searchArticle = async (req, res) => {
 	try {
+		const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+		const offset = req.query.offset ? parseInt(req.query.offset) : 0;
 		const userEmail = req.user.email;
-		let query = String(req.params.keyword);
+		let query = String(decodeURIComponent(req.params.keyword));
 		let filteredPosts = await Article.findAll();
 		filteredPosts = filteredPosts.map(e => e.dataValues);
-		if(!filteredPosts.length){
-			res.status(404).json({message: "there is now article"})
+		if (!filteredPosts.length) {
+			res.status(404).json({ message: "there is now article" })
 		}
 		query = query.toLowerCase();
 		console.log(userEmail)
 		if (query) {
-		  filteredPosts = filteredPosts.filter(e =>
-			e.title.toLowerCase().includes(query) ||
-			e.UserEmail.toLowerCase().includes(query) ||
-			e.content.toLowerCase().includes(query)
-		  );
+			filteredPosts = filteredPosts.filter(e =>
+				e.title.toLowerCase().includes(query) ||
+				e.UserEmail.toLowerCase().includes(query) ||
+				e.content.toLowerCase().includes(query)
+			);
 		}
 		let block = await BlockUser.findAll({
-            where: {
-                [Op.or]: [
-                    { user1_email: userEmail },
-                    { user2_email: userEmail }
-                ]
-            }
-        })
-        let blockUser = [];
-        if(block.length){
-            for (let i = 0; i < block.length; i++) {
-                if (block[i].user1_email == userEmail) blockUser.push(block[i].user2_email);
-                else blockUser.push(block[i].user1_email);
-            }
-        }
+			where: {
+				[Op.or]: [
+					{ user1_email: userEmail },
+					{ user2_email: userEmail }
+				]
+			}
+		})
+		let blockUser = [];
+		if (block.length) {
+			for (let i = 0; i < block.length; i++) {
+				if (block[i].user1_email == userEmail) blockUser.push(block[i].user2_email);
+				else blockUser.push(block[i].user1_email);
+			}
+		}
 
 		filteredPosts = filteredPosts.filter(e =>
 			!blockUser.includes(e.UserEmail)
-		  );
-		console.log(query)
+		);
+		filteredPosts = filteredPosts.slice(offset, offset + limit)
 		res.json({ filteredPosts });
 	} catch (e) {
 		const code = res.statusCode ? res.statusCode : 422;
