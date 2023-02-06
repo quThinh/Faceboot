@@ -13,7 +13,7 @@ const Op = Sequelize.Op;
 
 module.exports.createUser = async (req, res) => {
     try {
-        if (!req.body.username) throw new Error("Username is Required")
+        // if (!req.body.username) throw new Error("Username is Required")
         if (!req.body.email) throw new Error("Email is Required")
         if (!req.body.password) throw new Error("Password is Required")
         if (!req.body.firstname) throw new Error("Firstname is Required")
@@ -27,7 +27,7 @@ module.exports.createUser = async (req, res) => {
         const password = await hashPassword(req.body.password);
         const user = await User.create({
             id: uuid(),
-            user_name: req.body.username,
+            // user_name: req.body.username,
             hash_password: password,
             email: req.body.email,
             first_name: req.body.firstname,

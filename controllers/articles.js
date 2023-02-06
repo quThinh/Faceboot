@@ -118,7 +118,7 @@ module.exports.getDetailArticleById = async (req, res) => {
 			include: [
 				{
 					model: User,
-					attributes: ['email', 'intro_txt', 'avatar_url']
+					attributes: ['email', 'intro_txt', 'avatar_url', 'first_name']
 				}
 			]
 		})
@@ -273,17 +273,13 @@ module.exports.getAllArticles = async (req, res) => {
 		//Get all articles:
 		const { tag, author, limit = 20, offset = 0 } = req.query;
 		let article;
+		
 		if (!author && tag) {
 			article = await Article.findAll({
 				include: [
-					// {
-					// 	model: Tag,
-					// 	attributes: ['name'],
-					// 	where: { name: tag },
-					// },
 					{
 						model: User,
-						attributes: ['email', 'intro_txt', 'avatar_url'],
+						attributes: ['email', 'intro_txt', 'avatar_url', 'first_name'],
 					},
 				],
 				limit: parseInt(limit),
@@ -292,12 +288,8 @@ module.exports.getAllArticles = async (req, res) => {
 		} else if (author && !tag) {
 			article = await Article.findAll({
 				include: [
-					// {
-					// 	model: Tag,
-					// 	attributes: ['name'],
-					// },
 					{
-						model: User, attributes: ['email', 'intro_txt', 'avatar_url'], where: { email: author },
+						model: User, attributes: ['email', 'intro_txt', 'avatar_url', 'first_name'], where: { email: author },
 					},
 				],
 				limit: parseInt(limit),
@@ -313,7 +305,7 @@ module.exports.getAllArticles = async (req, res) => {
 					// },
 					{
 						model: User,
-						attributes: ['email', 'intro_txt', 'avatar_url'],
+						attributes: ['email', 'intro_txt', 'avatar_url', 'first_name'],
 						where: { email: author },
 					}
 				],
@@ -329,7 +321,7 @@ module.exports.getAllArticles = async (req, res) => {
 					// },
 					{
 						model: User,
-						attributes: ['email', 'intro_txt', 'avatar_url'],
+						attributes: ['email', 'intro_txt', 'avatar_url', 'first_name'],
 					},
 				],
 				limit: parseInt(limit),
@@ -351,7 +343,7 @@ module.exports.getAllArticles = async (req, res) => {
 				include: [
 					{
 						model: User,
-						attributes: ['email', 'intro_txt', 'avatar_url']
+						attributes: ['email', 'intro_txt', 'avatar_url', 'first_name']
 					}
 				]
 			})
