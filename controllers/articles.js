@@ -102,7 +102,7 @@ module.exports.getDetailArticleById = async (req, res) => {
 				},
 				{
 					model: User,
-					attributes: ['email', 'intro_txt', 'avatar_url'],
+					attributes: ['email', 'intro_txt', 'avatar_url', 'first_name', 'last_name'],
 				},
 			]
 		});
@@ -118,7 +118,7 @@ module.exports.getDetailArticleById = async (req, res) => {
 			include: [
 				{
 					model: User,
-					attributes: ['email', 'intro_txt', 'avatar_url', 'first_name']
+					attributes: ['email', 'intro_txt', 'avatar_url', 'first_name', 'last_name']
 				}
 			]
 		})
@@ -282,6 +282,9 @@ module.exports.getAllArticles = async (req, res) => {
 						attributes: ['email', 'intro_txt', 'avatar_url', 'first_name'],
 					},
 				],
+				order: [
+					['create_at', 'DESC']
+				],
 				limit: parseInt(limit),
 				offset: parseInt(offset),
 			});
@@ -291,6 +294,9 @@ module.exports.getAllArticles = async (req, res) => {
 					{
 						model: User, attributes: ['email', 'intro_txt', 'avatar_url', 'first_name'], where: { email: author },
 					},
+				],
+				order: [
+					['create_at', 'DESC']
 				],
 				limit: parseInt(limit),
 				offset: parseInt(offset),
@@ -309,6 +315,9 @@ module.exports.getAllArticles = async (req, res) => {
 						where: { email: author },
 					}
 				],
+				order: [
+					['create_at', 'DESC']
+				],
 				limit: parseInt(limit),
 				offset: parseInt(offset),
 			});
@@ -323,6 +332,9 @@ module.exports.getAllArticles = async (req, res) => {
 						model: User,
 						attributes: ['email', 'intro_txt', 'avatar_url', 'first_name'],
 					},
+				],
+				order: [
+					['create_at', 'DESC']
 				],
 				limit: parseInt(limit),
 				offset: parseInt(offset),
@@ -340,6 +352,9 @@ module.exports.getAllArticles = async (req, res) => {
 				where: {
 					ArticleId: article[i].dataValues.id
 				},
+				// order: [
+				// 	['createAt', 'DESC']
+				// ],
 				include: [
 					{
 						model: User,
