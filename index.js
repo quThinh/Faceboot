@@ -134,6 +134,13 @@ User.belongsToMany(User, {
   otherKey: 'send_user_email'
 });
 
+User.belongsTo(FriendRequest, {
+  through: 'FriendRequest',
+  as: 'receiver_user',
+  foreignKey: 'receive_user_email',
+  // otherKey: 'send_user_email'
+})
+
 //1 to many relation between User and SearchRecent
 User.hasMany(SearchRecent, { onDelete: 'CASCADE' })
 SearchRecent.belongsTo(User)

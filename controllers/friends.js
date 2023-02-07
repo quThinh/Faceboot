@@ -7,7 +7,7 @@ const FriendRequest = require('../models/FriendRequest')
 const { uuid } = require('uuidv4');
 const sequelize = require('../dbConnection');
 var Sequelize = require('sequelize');
-const { where } = require('sequelize');
+const { where, Model } = require('sequelize');
 const Op = Sequelize.Op;
 const BlockUser = require('../models/BlockUser')
 const checkUser = async (emailId) => {
@@ -134,16 +134,26 @@ module.exports.sendRequest = async (req, res) => {
 module.exports.getAllRequest = async (req, res) => {
     try {
         const emailId = req.user.email;
-        const requestList = await FriendRequest.findAll({
+        let requestList = await FriendRequest.findAll({
             where: {
                 receive_user_email: emailId
-            }
+            },
         });
-        res.status(200).json(requestList)
+        // requestList = requestList.map((e) => e.dataValues);
+        let reqList = [];
+        for(let i = 0; i < requestList.length; i++){
+            userData = await User.findOne({where: {email: requestList[i].dataValues.send_user_email}, attributes: ['email', 'first_name', 'avatar_url']})
+            reqObjec = {
+                request: requestList[0],
+                send_user: userData,
+            }
+            reqList.push(reqObjec);
+        }
+        res.status(200).json(reqList)
 
     } catch (e) {
         const status = res.statusCode ? res.statusCode : 500
-        res.status(status).json({ errors: { body: ['Could not login ', e.message] } })
+        res.status(status).json({ errors: { body: ['Error: ', e.message] } })
     }
 }
 
