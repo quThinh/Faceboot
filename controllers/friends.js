@@ -136,7 +136,7 @@ module.exports.getAllRequest = async (req, res) => {
         const emailId = req.user.email;
         const requestList = await FriendRequest.findAll({
             where: {
-                send_user_email: emailId
+                receive_user_email: emailId
             }
         });
         res.status(200).json(requestList)
